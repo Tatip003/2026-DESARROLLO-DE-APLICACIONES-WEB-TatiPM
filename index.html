@@ -2,24 +2,69 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="CSS/style.css">
+
     <title>Sistema de Ventas Digital</title>
 </head>
+
 <body>
 
     <header style="text-align: center;"> 
         <h1><i>Sistema de Ventas Digital</i></h1>
     </header>
     <h2>Plataforma para administrar pedidos y ventas en línea</h2>
-    <img src="img/ventas.jpg" alt="ventas" width="700" height="250">
+    <div class="container">
+    <img src="img/ventas.jpg"
+         alt="ventas"
+         class="img-fluid w-100 rounded shadow">
+</div>
+   <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
 
-    <nav>
-         <a href="#inicio">Inicio</a><br/> 
-        <a href="#Quienes-somos">¿Quiénes Somos?</a><br/> 
-        <a href="#productos">Productos</a><br/> 
-        <a href="#contacto">Contacto</a><br/>
-     </nav>
-        <main>
-             <section id="inicio"> 
+        <a class="navbar-brand" href="#">
+            Sistema de Ventas
+        </a>
+
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#menu">
+
+            <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+        <div class="collapse navbar-collapse" id="menu">
+
+            <ul class="navbar-nav ms-auto">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#inicio">Inicio</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#nosotros">Quiénes Somos</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#productos">Productos</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#contacto">Contacto</a>
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+</nav>
+        <main class="container">
+             <section id="inicio" class="text-center p-5 bg-light">
                 <h2>Inicio</h2>
              <p style="max-width: 900px; text-align: justify" >
                 Bienvenido a nuestro Sistema de Ventas Digital, un proyecto orientado a
@@ -28,10 +73,23 @@
              procesos de venta y mejorar la experiencia de los usuarios a través de una
              plataforma práctica y accesible.</p>
              </section>
-                
+                <br>
+
+<a href="#productos" class="btn btn-primary">
+    Ver Servicios
+</a>
+
+<a href="#contacto" class="btn btn-success">
+    Contacto
+</a>
+
         <section id="¿Quienes-somos?"><h2>Quiénes Somos</h2>
-        <p style="max-width: 900px; text-align: justify">
-             El Sistema de Ventas Digital es una herramienta creada para apoyar la administración de productos, 
+            <div class="row">
+
+    <div class="col-md-6">
+
+        <p>
+            El Sistema de Ventas Digital es una herramienta creada para apoyar la administración de productos, 
              clientes y pedidos en un solo lugar. Su finalidad es simplificar las actividades comerciales y 
              facilitar el acceso a  la información necesaria para la gestión de las ventas. Además, permite 
              crear y gestionar publicidad en diferentes redes sociales para atraer nuevos clientes y aumentar 
@@ -42,72 +100,143 @@
              negocio mediante el uso de herramientas tecnológicas que optimizan los procesos comerciales y 
              mejoran la experiencia tanto para los vendedores como para los clientes.
         </p>
-        <img src="img/System-.jpeg" alt="system-" width="400">
+        
+
+    </div>
+
+    <div class="col-md-6">
+
+        <img src="img/System-.jpeg"
+             alt="system-"
+             class="img-fluid rounded">
+
+    </div>
+
+</div>
+        
        </section>
 
-       <section id="productos">
-            <h2>Productos y Servicios</h2>
-        <ul> <li>Registro de productos.</li> 
-            <li>Gestión de inventario.</li> 
-            <li>Control de clientes.</li> 
-            <li>Registro de ventas.</li> 
-            <li>Generación de reportes.</li> 
-            <li>Administración de pedidos.</li> 
-        </ul> 
-       </section>
+       <section id="productos" class="container p-3">
 
-       <article> 
-         <h2>Video Informativo</h2>
+    <h2 class="text-center m-3">Productos y Servicios</h2>
 
-       </article>
+    <div class="row">
 
-       <section id="contacto"> 
+        <div class="col-md-4 m-3">
+            <div class="card p-3">
+                <h5>Registro de productos</h5>
+                <p>Gestión de productos.</p>
+            </div>
+        </div>
 
-    <p>
-        <strong>Correo:</strong> sistemaventas@email.com<br>
-        <strong>Teléfono:</strong> +593 09 999 9999<br>
-        <strong>Dirección:</strong> Palenque, Los Ríos, Ecuador<br><br>
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4225.742230896227!2d-79.75574055787764!3d-1.4337140018579948!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x902c959159ccd229%3A0x49d3daa8a123a167!2sPlaza%20Tur%C3%ADstica%20y%20Cultural%20de%20Palenque!5e0!3m2!1ses!2sec!4v1781456142294!5m2!1ses!2sec" width="200" height="100" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe><br>
+        <div class="col-md-4 m-3">
+            <div class="card p-3">
+                <h5>Inventario</h5>
+                <p>Control de stock.</p>
+            </div>
+        </div>
 
-        <strong>Instagram:</strong>
-        <a href="https://www.instagram.com/sistema_ventas_digitales.01" target="_blank">
-            @sistema_ventas_digitales.01</a><br>
+        <div class="col-md-4 m-3">
+            <div class="card p-3">
+                <h5>Clientes</h5>
+                <p>Gestión de clientes.</p>
+            </div>
+        </div>
 
-        <strong>TikTok:</strong>
-        <a href="https://www.tiktok.com/@sistema_ventas_digitales.01" target="_blank">
-            @sistema_ventas_digitales.01 </a><br>
+    </div>
 
-        <strong>Facebook:</strong>
-        <a href="https://www.facebook.com/sistema_ventas_digitales.01" target="_blank">
-            sistema_ventas_digitales.01</a>
-    </p>
+</section>
+
+       
+
+       <section id="contacto" class="container p-3">
+
+    <h2 class="text-center m-3">Contacto</h2>
+
+    <div class="row">
+
+        <!-- FORMULARIO -->
+        <div class="col-md-6">
+
+            <form>
+
+                <input type="text" class="form-control m-2" placeholder="Nombre">
+
+                <input type="email" class="form-control m-2" placeholder="Correo electrónico">
+
+                <input type="text" class="form-control m-2" placeholder="Asunto">
+
+                <textarea class="form-control m-2" rows="4" placeholder="Mensaje"></textarea>
+
+                <button class="btn btn-primary m-2">Enviar</button>
+
+            </form>
+
+        </div>
+
+        <!-- INFO -->
+        <div class="col-md-6">
+
+            <p>
+                <strong>Correo:</strong> sistemaventas@email.com<br>
+                <strong>Teléfono:</strong> +593 09 999 9999<br>
+                <strong>Dirección:</strong> Palenque, Los Ríos, Ecuador
+            </p>
+
+            <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18..."
+                width="100%"
+                height="200"
+                style="border:0;">
+            </iframe>
+
+        </div>
+
+    </div>
+
 </section>
 
 
-       <aside> 
-         <h3>Información Complementaria</h3> 
-         <p><b>Promoción especial: </b> obtenga un mes de prueba gratuita del sistema. </p> 
-         <p><b>Horario de atención:</b>  lunes a viernes de 08:00 a 18:00. </p> 
-       </aside> 
+      <aside class="aside-info container my-4">
+
+    <h3>Información Complementaria</h3>
+
+    <p><b> Promoción especial:</b> Obtenga un mes de prueba gratuita del sistema.</p>
+
+    <p><b> Horario de atención:</b> Lunes a viernes de 08:00 a 18:00.</p>
+
+</aside>
     
      <article>
       <h2>Video Informativo</h2>
+     <div class="ratio ratio-16x9 my-4">
 
       <iframe
-        width="560"
-        height="315"
         src="https://www.youtube.com/embed/fY4MJMETWQE"
         title="Sistema de Ventas Digital"
         allowfullscreen>
-      </iframe>
-    </article>
-   </main> 
-    <footer> 
-        <p><b>Nombre del estudiante:</b> Tatiana Stefania Peñafiel Moran<br> 
-        <b> Asignatura:</b> Desarrollo de Aplicaciones Web<br> 
-        <b> Año:</b>2026 </p>  
-    </footer>
-   
+    </iframe>
 
+</div>
+
+ </div>
+    </article>
+   <footer class="footer-custom text-center p-4 mt-5">
+
+    <p class="mb-1">
+        <b>Nombre del estudiante:</b> Tatiana Stefania Peñafiel Moran
+    </p>
+
+    <p class="mb-1">
+        <b>Asignatura:</b> Desarrollo de Aplicaciones Web
+    </p>
+
+    <p class="mb-0">
+        <b>Año:</b> 2026
+    </p>
+
+</footer>
+   
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
