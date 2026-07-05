@@ -163,35 +163,47 @@
                  <div class="form-group">
                      <label for="nombre">Nombre</label>
                     <input type="text" id="nombre" class="form-control">
+                       <small id="errorNombre" class="text-danger"></small>
                  </div>
 
                 <div class="form-group">
                     <label for="descripcion">Descripción</label>
                     <input type="text" id="descripcion" class="form-control">
+                     <small id="errorDescripcion" class="text-danger"></small>
                 </div>
 
                  <div class="form-group">
                  <label for="categoria">Categoría</label>
                     <input type="text" id="categoria" class="form-control">
+                    <small id="errorCategoria" class="text-danger"></small>
                 </div>
 
                 <div class="form-group">
                     <label for="tipo">Tipo</label>
                     <input type="text" id="tipo" class="form-control">
+                     <small id="errorTipo" class="text-danger"></small>
                  </div>
 
                 <button type="submit" class="btn btn-primary">Registrar</button>
+                   
+         </form>
+                     
+                      <p id="mensaje" class="mt-2"></p>
 
-                </form>
+                        <p>Total de registros: <span id="total">0</span></p>
 
-                <p id="mensaje" class="mt-2"></p>
+                          <div id="listaRegistros"></div>
 
-                    <p>Total de registros: <span id="total">0</span></p>
-
-                    <div id="listaRegistros"></div>
                     <div class="alert alert-success mt-3" style="display:none;" id="alertaExito">
-                     Datos guardados correctamente
+                         Datos guardados correctamente
                     </div>
+
+                    <div class="alert alert-danger mt-3" style="display:none;" id="alertaError">
+                    Corrija los errores antes de registrar
+                    </div>
+               
+
+                
 
         <!-- INFO -->
         <div class="col-md-6">
@@ -255,7 +267,7 @@
     </p>
 
 </footer>
-<script src="js/script.js"></script>
+ <script src="js/script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
