@@ -12,16 +12,21 @@
 </head>
 
 <body>
-
+    <!-- ========= base.html ========= -->
+<!-- Encabezado reutilizable -->
     <header style="text-align: center;"> 
         <h1><i>Sistema de Ventas Digital</i></h1>
     </header>
+    <!-- Fin del encabezado -->
     <h2>Plataforma para administrar pedidos y ventas en línea</h2>
     <div class="container">
     <img src="img/ventas.jpg"
          alt="ventas"
          class="img-fluid w-100 rounded shadow">
 </div>
+<!-- ===== Fin del encabezado ===== -->
+ 
+<!-- Navegación reutilizable -->
    <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
 
@@ -46,7 +51,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="#nosotros">Quiénes Somos</a>
+                   <a class="nav-link" href="#nosotros">Quiénes Somos</a>
                 </li>
 
                 <li class="nav-item">
@@ -63,6 +68,9 @@
 
     </div>
 </nav>
+<!-- Fin de la navegación -->
+
+<!-- Contenido dinámico -->
         <main class="container">
              <section id="inicio" class="text-center p-5 bg-light">
                 <h2>Inicio</h2>
@@ -75,21 +83,22 @@
              </section>
                 <br>
 
-<a href="#productos" class="btn btn-primary">
-    Ver Servicios
-</a>
+             <a href="#productos" class="btn btn-primary">
+               Ver Servicios
+                </a>
 
-<a href="#contacto" class="btn btn-success">
-    Contacto
-</a>
+            <a href="#contacto" class="btn btn-success">
+                Contacto
+                </a>
 
-        <section id="¿Quienes-somos?"><h2>Quiénes Somos</h2>
-            <div class="row">
+        <section id="nosotros">
+            <h2>Quiénes Somos</h2>
+         <div class="row">
 
-    <div class="col-md-6">
+          <div class="col-md-6">
 
-        <p>
-            El Sistema de Ventas Digital es una herramienta creada para apoyar la administración de productos, 
+             <p>
+             El Sistema de Ventas Digital es una herramienta creada para apoyar la administración de productos, 
              clientes y pedidos en un solo lugar. Su finalidad es simplificar las actividades comerciales y 
              facilitar el acceso a  la información necesaria para la gestión de las ventas. Además, permite 
              crear y gestionar publicidad en diferentes redes sociales para atraer nuevos clientes y aumentar 
@@ -99,64 +108,41 @@
              inventarios, registrar ventas y generar reportes. De esta forma, contribuye al crecimiento del 
              negocio mediante el uso de herramientas tecnológicas que optimizan los procesos comerciales y 
              mejoran la experiencia tanto para los vendedores como para los clientes.
-        </p>
+              </p>
         
 
-    </div>
+           </div>
 
-    <div class="col-md-6">
+             <div class="col-md-6">
 
-        <img src="img/System-.jpeg"
+             <img src="img/System-.jpeg"
              alt="system-"
              class="img-fluid rounded">
 
-    </div>
+            </div>
+          </div>
+    </section>
 
-</div>
+
         
-       </section>
-
-       <section id="productos" class="container p-3">
+      <section id="productos" class="container p-3">
 
     <h2 class="text-center m-3">Productos y Servicios</h2>
 
-    <div class="row">
-
-        <div class="col-md-4 m-3">
-            <div class="card p-3">
-                <h5>Registro de productos</h5>
-                <p>Gestión de productos.</p>
-            </div>
-        </div>
-
-        <div class="col-md-4 m-3">
-            <div class="card p-3">
-                <h5>Inventario</h5>
-                <p>Control de stock.</p>
-            </div>
-        </div>
-
-        <div class="col-md-4 m-3">
-            <div class="card p-3">
-                <h5>Clientes</h5>
-                <p>Gestión de clientes.</p>
-            </div>
-        </div>
+    <!-- Las tarjetas se crearán dinámicamente desde JavaScript -->
+    <div class="row" id="listaServicios">
 
     </div>
 
-</section>
-
+    </section>
        
 
        <section id="contacto" class="container p-3">
 
-    <h2 class="text-center m-3">Contacto</h2>
+        <h2 class="text-center m-3">Contacto</h2>
 
-    <div class="row">
-
-        
-       
+        <div class="row">
+    
 
           <form id="formContacto">
 
@@ -202,7 +188,7 @@
                     Corrija los errores antes de registrar
                     </div>
                
-
+          </section>
                 
 
         <!-- INFO -->
@@ -225,32 +211,36 @@
 
     </div>
 
-</section>
+
 
 
       <aside class="aside-info container my-4">
 
-    <h3>Información Complementaria</h3>
+        <h3>Información Complementaria</h3>
 
-    <p><b> Promoción especial:</b> Obtenga un mes de prueba gratuita del sistema.</p>
+        <p><b> Promoción especial:</b> Obtenga un mes de prueba gratuita del sistema.</p>
 
-    <p><b> Horario de atención:</b> Lunes a viernes de 08:00 a 18:00.</p>
+        <p><b> Horario de atención:</b> Lunes a viernes de 08:00 a 18:00.</p>
 
-</aside>
+       </aside>
     
      <article>
       <h2>Video Informativo</h2>
-     <div class="ratio ratio-16x9 my-4">
+        <div class="ratio ratio-16x9 my-4">
 
-      <iframe
+    <iframe
         src="https://www.youtube.com/embed/fY4MJMETWQE"
         title="Sistema de Ventas Digital"
         allowfullscreen>
     </iframe>
 
-</div>
 
- </div>
+
+        </div>
+ 
+  <!-- ========= Fin de base.html ========= -->
+
+<!-- Pie de página reutilizable -->
     </article>
    <footer class="footer-custom text-center p-4 mt-5">
 
@@ -265,7 +255,7 @@
     <p class="mb-0">
         <b>Año:</b> 2026
     </p>
-
+</main>
 </footer>
  <script src="js/script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

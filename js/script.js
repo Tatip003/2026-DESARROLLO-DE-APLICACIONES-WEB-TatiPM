@@ -2,8 +2,28 @@ const formulario = document.getElementById("formContacto");
 const mensaje = document.getElementById("mensaje");
 const lista = document.getElementById("listaRegistros");
 const total = document.getElementById("total");
+// Contenedor de los servicios
+const listaServicios = document.getElementById("listaServicios");
 
-let contador = 0;
+// Servicios del sistema
+const servicios = [
+    {
+        nombre: "Registro de productos",
+        descripcion: "Gestión de productos."
+    },
+    {
+        nombre: "Inventario",
+        descripcion: "Control de stock."
+    },
+    {
+        nombre: "Clientes",
+        descripcion: "Gestión de clientes."
+    }
+];
+
+// Arreglo donde se guardarán los registros del formulario
+let registros = [];
+
 
 const nombreInput = document.getElementById("nombre");
 const descripcionInput = document.getElementById("descripcion");
@@ -26,7 +46,8 @@ descripcionInput.addEventListener("input", validarDescripcion);
 descripcionInput.addEventListener("blur", validarDescripcion);
 
 categoriaInput.addEventListener("input", validarCategoria);
-tipoInput.addEventListener("change", validarTipo);
+tipoInput.addEventListener("input", validarTipo);
+tipoInput.addEventListener("blur", validarTipo);
 
 function validarNombre() {
     if (nombreInput.value.trim().length < 3) {
@@ -79,7 +100,67 @@ function validarTipo() {
     tipoInput.classList.remove("is-invalid");
     return true;
 }
+function mostrarServicios() {
 
+    listaServicios.innerHTML = "";
+
+    servicios.forEach(function(servicio){
+
+        listaServicios.innerHTML += `
+            <div class="col-md-4 mb-3">
+                <div class="card p-3 shadow h-100">
+                    <h5>${servicio.nombre}</h5>
+                    <p>${servicio.descripcion}</p>
+                </div>
+            </div>
+        `;
+
+    });
+
+}
+
+function mostrarRegistros(){
+
+    lista.innerHTML="";
+
+    registros.forEach(function(registro,index){
+
+        lista.innerHTML += `
+
+        <div class="card p-3 mt-3">
+
+            <p><strong>Nombre:</strong> ${registro.nombre}</p>
+
+            <p><strong>Descripción:</strong> ${registro.descripcion}</p>
+
+            <p><strong>Categoría:</strong> ${registro.categoria}</p>
+
+            <p><strong>Tipo:</strong> ${registro.tipo}</p>
+
+            <button
+                class="btn btn-danger mt-2"
+                onclick="eliminarRegistro(${index})">
+
+                Eliminar
+
+            </button>
+
+        </div>
+
+        `;
+
+    });
+
+    total.textContent=registros.length;
+
+}
+function eliminarRegistro(indice){
+
+    registros.splice(indice,1);
+
+    mostrarRegistros();
+
+}
 formulario.addEventListener("submit", function(event) {
     event.preventDefault();
 
@@ -112,35 +193,20 @@ formulario.addEventListener("submit", function(event) {
     alertaError.style.display = "none";
     alertaExito.style.display = "block";
     
-    // Crear un nuevo registro
-    const registro = document.createElement("div");
-    registro.classList.add("card", "p-3", "mt-3");
-
-    registro.innerHTML = `
-        <p><strong>nombre:</strong> ${nombre}</p>
-        <p><strong>Descripción:</strong> ${descripcion}</p>
-        <p><strong>Categoría:</strong> ${categoria}</p>
-        <p><strong>Tipo:</strong> ${tipo}</p>
-    `;
-
-    // Botón eliminar
-    const botonEliminar = document.createElement("button");
-    botonEliminar.textContent = "Eliminar";
-    botonEliminar.classList.add("btn", "btn-danger", "mt-2");
-
-    botonEliminar.addEventListener("click", function() {
-        registro.remove();
-        contador--;
-        total.textContent = contador;
-    });
-
-    registro.appendChild(botonEliminar);
-    lista.appendChild(registro);
-
-    contador++;
-    total.textContent = contador;
-
-    alertaError.style.display = "block";
-    alertaExito.style.display = "none";
-    formulario.reset();
+    // Guardar el registro en el arreglo
+registros.push({
+    nombre,
+    descripcion,
+    categoria,
+    tipo
 });
+
+// Mostrar nuevamente todos los registros
+mostrarRegistros();
+
+   
+formulario.reset();
+
+});
+// Mostrar los servicios al iniciar la página
+mostrarServicios();
