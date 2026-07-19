@@ -1,3 +1,4 @@
+
 const formulario = document.getElementById("formContacto");
 const mensaje = document.getElementById("mensaje");
 const lista = document.getElementById("listaRegistros");
@@ -37,7 +38,7 @@ const errorTipo = document.getElementById("errorTipo");
 
 const alertaExito = document.getElementById("alertaExito");
 const alertaError = document.getElementById("alertaError");
-
+const spinner = document.getElementById("spinnerCarga");
 
 nombreInput.addEventListener("input", validarNombre);
 nombreInput.addEventListener("blur", validarNombre);
@@ -194,18 +195,33 @@ formulario.addEventListener("submit", function(event) {
     alertaExito.style.display = "block";
     
     // Guardar el registro en el arreglo
-registros.push({
-    nombre,
-    descripcion,
-    categoria,
-    tipo
-});
+// Mostrar spinner
+spinner.style.display = "block";
 
-// Mostrar nuevamente todos los registros
-mostrarRegistros();
+// Simular carga de 2 segundos
+setTimeout(function () {
 
-   
-formulario.reset();
+    // Guardar el registro
+    registros.push({
+        nombre,
+        descripcion,
+        categoria,
+        tipo
+    });
+
+    // Actualizar la lista
+    mostrarRegistros();
+
+    // Ocultar spinner
+    spinner.style.display = "none";
+
+    // Mostrar mensaje de éxito
+    alertaError.style.display = "none";
+    alertaExito.style.display = "block";
+
+    formulario.reset();
+
+}, 2000);
 
 });
 // Mostrar los servicios al iniciar la página
