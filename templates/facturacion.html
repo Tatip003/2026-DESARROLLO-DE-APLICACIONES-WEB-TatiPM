@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}
+Facturación - Sistema de Ventas
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <h1 class="text-center mb-4">
+        Módulo de Facturación
+    </h1>
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered table-hover">
+
+            <thead class="table-dark">
+
+                <tr>
+                    <th>Número</th>
+                    <th>Cliente</th>
+                    <th>Fecha</th>
+                    <th>Total</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for factura in facturas %}
+
+                <tr>
+                    <td>{{ factura.numero }}</td>
+                    <td>{{ factura.cliente }}</td>
+                    <td>{{ factura.fecha }}</td>
+                    <td>${{ factura.total }}</td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

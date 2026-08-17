@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}
+Proveedores - Sistema de Ventas
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <h1 class="text-center mb-4">
+        Gestión de Proveedores
+    </h1>
+
+    <div class="row">
+
+        {% for proveedor in proveedores %}
+
+        <div class="col-md-4 mb-4">
+
+            <div class="card h-100 shadow-sm">
+
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        {{ proveedor.empresa }}
+                    </h5>
+
+                    <p>
+                        <strong>Contacto:</strong>
+                        {{ proveedor.contacto }}
+                    </p>
+
+                    <p>
+                        <strong>Teléfono:</strong>
+                        {{ proveedor.telefono }}
+                    </p>
+
+                    <p>
+                        <strong>Producto:</strong>
+                        {{ proveedor.producto }}
+                    </p>
+
+                    <button class="btn btn-primary">
+                        Ver proveedor
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

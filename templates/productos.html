@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}
+Productos - Sistema de Ventas
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <h1 class="text-center mb-4">
+        Gestión de Productos
+    </h1>
+
+    <div class="row">
+
+        {% for producto in productos %}
+
+        <div class="col-md-4 mb-4">
+
+            <div class="card h-100 shadow-sm">
+
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        {{ producto.nombre }}
+                    </h5>
+
+                    <p class="card-text">
+                        <strong>Categoría:</strong>
+                        {{ producto.categoria }}
+                    </p>
+
+                    <p class="card-text">
+                        <strong>Precio:</strong>
+                        ${{ producto.precio }}
+                    </p>
+
+                    <p class="card-text">
+                        <strong>Stock:</strong>
+                        {{ producto.stock }} unidades
+                    </p>
+
+                    <button class="btn btn-primary">
+                        Ver producto
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}
