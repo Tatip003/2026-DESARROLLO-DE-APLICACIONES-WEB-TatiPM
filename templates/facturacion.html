@@ -12,6 +12,96 @@ Facturación - Sistema de Ventas
         Módulo de Facturación
     </h1>
 
+
+    <!-- ================= FORMULARIO ================= -->
+
+    <div class="card shadow-sm mb-5">
+
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Registrar factura</h4>
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                {{ form.hidden_tag() }}
+
+
+                <!-- Número de factura -->
+
+                <div class="mb-3">
+
+                    {{ form.numero.label(class="form-label") }}
+
+                    {{ form.numero(class="form-control") }}
+
+                    {% for error in form.numero.errors %}
+
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- Cliente -->
+
+                <div class="mb-3">
+
+                    {{ form.cliente.label(class="form-label") }}
+
+                    {{ form.cliente(class="form-control") }}
+
+                    {% for error in form.cliente.errors %}
+
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- Total -->
+
+                <div class="mb-3">
+
+                    {{ form.total.label(class="form-label") }}
+
+                    {{ form.total(class="form-control") }}
+
+                    {% for error in form.total.errors %}
+
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- Botón -->
+
+                {{ form.submit(class="btn btn-primary") }}
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= LISTA DE FACTURAS ================= -->
+
+    <h2 class="mb-3">
+        Facturas registradas
+    </h2>
+
     <div class="table-responsive">
 
         <table class="table table-bordered table-hover">
@@ -19,23 +109,36 @@ Facturación - Sistema de Ventas
             <thead class="table-dark">
 
                 <tr>
+
                     <th>Número</th>
+
                     <th>Cliente</th>
-                    <th>Fecha</th>
+
                     <th>Total</th>
+
                 </tr>
 
             </thead>
+
 
             <tbody>
 
                 {% for factura in facturas %}
 
                 <tr>
-                    <td>{{ factura.numero }}</td>
-                    <td>{{ factura.cliente }}</td>
-                    <td>{{ factura.fecha }}</td>
-                    <td>${{ factura.total }}</td>
+
+                    <td>
+                        {{ factura.numero }}
+                    </td>
+
+                    <td>
+                        {{ factura.cliente }}
+                    </td>
+
+                    <td>
+                        ${{ "%.2f"|format(factura.total) }}
+                    </td>
+
                 </tr>
 
                 {% endfor %}

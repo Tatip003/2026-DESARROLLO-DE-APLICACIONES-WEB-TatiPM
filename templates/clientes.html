@@ -12,6 +12,88 @@ Clientes - Sistema de Ventas
         Gestión de Clientes
     </h1>
 
+    <!-- ================= FORMULARIO ================= -->
+
+    <div class="card shadow-sm mb-5">
+
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Registrar cliente</h4>
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                {{ form.hidden_tag() }}
+
+                <!-- Nombre -->
+
+                <div class="mb-3">
+
+                    {{ form.nombre.label(class="form-label") }}
+
+                    {{ form.nombre(class="form-control") }}
+
+                    {% for error in form.nombre.errors %}
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- Correo -->
+
+                <div class="mb-3">
+
+                    {{ form.correo.label(class="form-label") }}
+
+                    {{ form.correo(class="form-control") }}
+
+                    {% for error in form.correo.errors %}
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- Teléfono -->
+
+                <div class="mb-3">
+
+                    {{ form.telefono.label(class="form-label") }}
+
+                    {{ form.telefono(class="form-control") }}
+
+                    {% for error in form.telefono.errors %}
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- Botón -->
+
+                {{ form.submit(class="btn btn-primary") }}
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= LISTA DE CLIENTES ================= -->
+
+    <h2 class="mb-3">
+        Clientes registrados
+    </h2>
+
     <div class="table-responsive">
 
         <table class="table table-striped table-hover">
@@ -31,9 +113,13 @@ Clientes - Sistema de Ventas
                 {% for cliente in clientes %}
 
                 <tr>
+
                     <td>{{ cliente.nombre }}</td>
+
                     <td>{{ cliente.correo }}</td>
+
                     <td>{{ cliente.telefono }}</td>
+
                 </tr>
 
                 {% endfor %}

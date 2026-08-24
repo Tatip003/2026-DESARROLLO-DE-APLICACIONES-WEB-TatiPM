@@ -12,6 +12,96 @@ Productos - Sistema de Ventas
         Gestión de Productos
     </h1>
 
+    <!-- ================= FORMULARIO ================= -->
+
+    <div class="card shadow-sm mb-5">
+
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Registrar producto</h4>
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                {{ form.hidden_tag() }}
+
+                <!-- Nombre -->
+                <div class="mb-3">
+
+                    {{ form.nombre.label(class="form-label") }}
+
+                    {{ form.nombre(class="form-control") }}
+
+                    {% for error in form.nombre.errors %}
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+                <!-- Categoría -->
+                <div class="mb-3">
+
+                    {{ form.categoria.label(class="form-label") }}
+
+                    {{ form.categoria(class="form-control") }}
+
+                    {% for error in form.categoria.errors %}
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+                <!-- Precio -->
+                <div class="mb-3">
+
+                    {{ form.precio.label(class="form-label") }}
+
+                    {{ form.precio(class="form-control") }}
+
+                    {% for error in form.precio.errors %}
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+                <!-- Stock -->
+                <div class="mb-3">
+
+                    {{ form.stock.label(class="form-label") }}
+
+                    {{ form.stock(class="form-control") }}
+
+                    {% for error in form.stock.errors %}
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+                <!-- Botón -->
+                {{ form.submit(class="btn btn-success") }}
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= LISTA DE PRODUCTOS ================= -->
+
+    <h2 class="mb-4">
+        Productos registrados
+    </h2>
+
     <div class="row">
 
         {% for producto in productos %}
@@ -23,7 +113,7 @@ Productos - Sistema de Ventas
                 <div class="card-body">
 
                     <h5 class="card-title">
-                        {{ producto.nombre }}
+                        {{ producto.nombre|upper }}
                     </h5>
 
                     <p class="card-text">
@@ -40,6 +130,22 @@ Productos - Sistema de Ventas
                         <strong>Stock:</strong>
                         {{ producto.stock }} unidades
                     </p>
+
+                    {% if producto.stock > 0 %}
+
+                        <span class="badge bg-success">
+                            Disponible
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge bg-danger">
+                            Agotado
+                        </span>
+
+                    {% endif %}
+
+                    <br><br>
 
                     <button class="btn btn-primary">
                         Ver producto
