@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if editar %}
+Editar producto
+{% else %}
+Registrar producto
+{% endif %}
+
+* Sistema de Ventas
+  {% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+```
+<div class="row justify-content-center">
+
+    <div class="col-md-8">
+
+        <div class="card shadow-sm">
+
+            <div class="card-header bg-primary text-white">
+
+                <h4 class="mb-0">
+
+                    {% if editar %}
+                        Editar producto
+                    {% else %}
+                        Registrar producto
+                    {% endif %}
+
+                </h4>
+
+            </div>
+
+            <div class="card-body">
+
+                <form method="POST">
+
+                    {{ form.hidden_tag() }}
+
+                    <!-- Nombre -->
+
+                    <div class="mb-3">
+
+                        {{ form.nombre.label(class="form-label") }}
+
+                        {{ form.nombre(class="form-control") }}
+
+                        {% for error in form.nombre.errors %}
+
+                            <div class="text-danger mt-1">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- Categoría -->
+
+                    <div class="mb-3">
+
+                        {{ form.categoria.label(class="form-label") }}
+
+                        {{ form.categoria(class="form-control") }}
+
+                        {% for error in form.categoria.errors %}
+
+                            <div class="text-danger mt-1">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- Precio -->
+
+                    <div class="mb-3">
+
+                        {{ form.precio.label(class="form-label") }}
+
+                        {{ form.precio(class="form-control") }}
+
+                        {% for error in form.precio.errors %}
+
+                            <div class="text-danger mt-1">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- Stock -->
+
+                    <div class="mb-3">
+
+                        {{ form.stock.label(class="form-label") }}
+
+                        {{ form.stock(class="form-control") }}
+
+                        {% for error in form.stock.errors %}
+
+                            <div class="text-danger mt-1">
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- Botones -->
+
+                    {% if editar %}
+
+                        {{ form.submit(
+                            class="btn btn-success",
+                            value="Actualizar producto"
+                        ) }}
+
+                    {% else %}
+
+                        {{ form.submit(
+                            class="btn btn-primary",
+                            value="Guardar producto"
+                        ) }}
+
+                    {% endif %}
+
+                    <a href="{{ url_for('productos') }}"
+                       class="btn btn-secondary">
+                        Cancelar
+                    </a>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+{% endblock %}

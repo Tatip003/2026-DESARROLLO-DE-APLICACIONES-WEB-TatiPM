@@ -12,84 +12,10 @@ Proveedores - Sistema de Ventas
         Gestión de Proveedores
     </h1>
 
-    <!-- FORMULARIO -->
-
-    <div class="card shadow-sm mb-5">
-
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Registrar proveedor</h4>
-        </div>
-
-        <div class="card-body">
-
-            <form method="POST">
-
-                {{ form.hidden_tag() }}
-
-                <!-- Nombre -->
-
-                <div class="mb-3">
-
-                    {{ form.nombre.label(class="form-label") }}
-
-                    {{ form.nombre(class="form-control") }}
-
-                    {% for error in form.nombre.errors %}
-                        <div class="text-danger mt-1">
-                            {{ error }}
-                        </div>
-                    {% endfor %}
-
-                </div>
-
-                <!-- Contacto -->
-
-                <div class="mb-3">
-
-                    {{ form.contacto.label(class="form-label") }}
-
-                    {{ form.contacto(class="form-control") }}
-
-                    {% for error in form.contacto.errors %}
-                        <div class="text-danger mt-1">
-                            {{ error }}
-                        </div>
-                    {% endfor %}
-
-                </div>
-
-                <!-- Producto -->
-
-                <div class="mb-3">
-
-                    {{ form.producto.label(class="form-label") }}
-
-                    {{ form.producto(class="form-control") }}
-
-                    {% for error in form.producto.errors %}
-                        <div class="text-danger mt-1">
-                            {{ error }}
-                        </div>
-                    {% endfor %}
-
-                </div>
-
-                <!-- Botón -->
-
-                {{ form.submit(class="btn btn-primary") }}
-
-            </form>
-
-        </div>
-
-    </div>
-
-
-    <!-- LISTA DE PROVEEDORES -->
-
-    <h2 class="mb-3">
-        Proveedores registrados
-    </h2>
+    <a href="{{ url_for('formulario_proveedor') }}"
+       class="btn btn-primary mb-4">
+        Registrar proveedor
+    </a>
 
     <div class="table-responsive">
 
@@ -98,9 +24,11 @@ Proveedores - Sistema de Ventas
             <thead class="table-dark">
 
                 <tr>
+                    <th>ID</th>
                     <th>Nombre</th>
                     <th>Contacto</th>
                     <th>Producto</th>
+                    <th>Acciones</th>
                 </tr>
 
             </thead>
@@ -111,9 +39,36 @@ Proveedores - Sistema de Ventas
 
                 <tr>
 
+                    <td>{{ proveedor.id }}</td>
+
                     <td>{{ proveedor.nombre }}</td>
+
                     <td>{{ proveedor.contacto }}</td>
+
                     <td>{{ proveedor.producto }}</td>
+
+                    <td>
+
+                        <a href="{{ url_for('editar_proveedor', id=proveedor.id) }}"
+                           class="btn btn-warning btn-sm">
+                            Editar
+                        </a>
+
+                        <form method="POST"
+                              action="{{ url_for('eliminar_proveedor', id=proveedor.id) }}"
+                              style="display:inline;">
+
+                            {{ form.hidden_tag() }}
+
+                            <button type="submit"
+                                    class="btn btn-danger btn-sm"
+                                    onclick="return confirm('¿Desea eliminar este proveedor?');">
+                                Eliminar
+                            </button>
+
+                        </form>
+
+                    </td>
 
                 </tr>
 

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if editar %}
+Editar Cliente
+{% else %}
+Registrar Cliente
+{% endif %}
+- Sistema de Ventas
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+
+            <h3 class="mb-0">
+
+                {% if editar %}
+                    Editar cliente
+                {% else %}
+                    Registrar cliente
+                {% endif %}
+
+            </h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                <!-- Protección CSRF -->
+                {{ form.hidden_tag() }}
+
+                <!-- Nombre -->
+                <div class="mb-3">
+
+                    {{ form.nombre.label(class="form-label") }}
+
+                    {{ form.nombre(class="form-control") }}
+
+                    {% for error in form.nombre.errors %}
+
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+                <!-- Correo -->
+                <div class="mb-3">
+
+                    {{ form.correo.label(class="form-label") }}
+
+                    {{ form.correo(class="form-control") }}
+
+                    {% for error in form.correo.errors %}
+
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+                <!-- Teléfono -->
+                <div class="mb-3">
+
+                    {{ form.telefono.label(class="form-label") }}
+
+                    {{ form.telefono(class="form-control") }}
+
+                    {% for error in form.telefono.errors %}
+
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+                <!-- Botón -->
+                {{ form.submit(class="btn btn-success") }}
+
+                <!-- Regresar -->
+                <a href="{{ url_for('clientes') }}"
+                   class="btn btn-secondary">
+                    Cancelar
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

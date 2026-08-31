@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if editar %}
+Editar proveedor
+{% else %}
+Registrar proveedor
+{% endif %}
+- Sistema de Ventas
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+
+            <h3 class="mb-0">
+
+                {% if editar %}
+                    Editar proveedor
+                {% else %}
+                    Registrar proveedor
+                {% endif %}
+
+            </h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                {{ form.hidden_tag() }}
+
+                <!-- Nombre -->
+
+                <div class="mb-3">
+
+                    {{ form.nombre.label(class="form-label") }}
+
+                    {{ form.nombre(class="form-control") }}
+
+                    {% for error in form.nombre.errors %}
+
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- Contacto -->
+
+                <div class="mb-3">
+
+                    {{ form.contacto.label(class="form-label") }}
+
+                    {{ form.contacto(class="form-control") }}
+
+                    {% for error in form.contacto.errors %}
+
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- Producto -->
+
+                <div class="mb-3">
+
+                    {{ form.producto.label(class="form-label") }}
+
+                    {{ form.producto(class="form-control") }}
+
+                    {% for error in form.producto.errors %}
+
+                        <div class="text-danger mt-1">
+                            {{ error }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                {{ form.submit(class="btn btn-success") }}
+
+                <a href="{{ url_for('proveedores') }}"
+                   class="btn btn-secondary">
+                    Cancelar
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -9,117 +9,29 @@ Facturación - Sistema de Ventas
 <div class="container py-5">
 
     <h1 class="text-center mb-4">
-        Módulo de Facturación
+        Gestión de Facturación
     </h1>
 
-
-    <!-- ================= FORMULARIO ================= -->
-
-    <div class="card shadow-sm mb-5">
-
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Registrar factura</h4>
-        </div>
-
-        <div class="card-body">
-
-            <form method="POST">
-
-                {{ form.hidden_tag() }}
-
-
-                <!-- Número de factura -->
-
-                <div class="mb-3">
-
-                    {{ form.numero.label(class="form-label") }}
-
-                    {{ form.numero(class="form-control") }}
-
-                    {% for error in form.numero.errors %}
-
-                        <div class="text-danger mt-1">
-                            {{ error }}
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-
-                <!-- Cliente -->
-
-                <div class="mb-3">
-
-                    {{ form.cliente.label(class="form-label") }}
-
-                    {{ form.cliente(class="form-control") }}
-
-                    {% for error in form.cliente.errors %}
-
-                        <div class="text-danger mt-1">
-                            {{ error }}
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-
-                <!-- Total -->
-
-                <div class="mb-3">
-
-                    {{ form.total.label(class="form-label") }}
-
-                    {{ form.total(class="form-control") }}
-
-                    {% for error in form.total.errors %}
-
-                        <div class="text-danger mt-1">
-                            {{ error }}
-                        </div>
-
-                    {% endfor %}
-
-                </div>
-
-
-                <!-- Botón -->
-
-                {{ form.submit(class="btn btn-primary") }}
-
-            </form>
-
-        </div>
-
-    </div>
-
-
-    <!-- ================= LISTA DE FACTURAS ================= -->
-
-    <h2 class="mb-3">
-        Facturas registradas
-    </h2>
+    <a href="{{ url_for('formulario_facturacion') }}"
+       class="btn btn-primary mb-4">
+        Registrar factura
+    </a>
 
     <div class="table-responsive">
 
-        <table class="table table-bordered table-hover">
+        <table class="table table-striped table-hover">
 
             <thead class="table-dark">
 
                 <tr>
-
+                    <th>ID</th>
                     <th>Número</th>
-
                     <th>Cliente</th>
-
                     <th>Total</th>
-
+                    <th>Acciones</th>
                 </tr>
 
             </thead>
-
 
             <tbody>
 
@@ -127,16 +39,35 @@ Facturación - Sistema de Ventas
 
                 <tr>
 
-                    <td>
-                        {{ factura.numero }}
-                    </td>
+                    <td>{{ factura.id }}</td>
+
+                    <td>{{ factura.numero }}</td>
+
+                    <td>{{ factura.cliente }}</td>
+
+                    <td>${{ factura.total }}</td>
 
                     <td>
-                        {{ factura.cliente }}
-                    </td>
 
-                    <td>
-                        ${{ "%.2f"|format(factura.total) }}
+                        <a href="{{ url_for('editar_factura', id=factura.id) }}"
+                           class="btn btn-warning btn-sm">
+                            Editar
+                        </a>
+
+                        <form method="POST"
+                              action="{{ url_for('eliminar_factura', id=factura.id) }}"
+                              style="display:inline;">
+
+                            {{ form.hidden_tag() }}
+
+                            <button type="submit"
+                                    class="btn btn-danger btn-sm"
+                                    onclick="return confirm('¿Desea eliminar esta factura?');">
+                                Eliminar
+                            </button>
+
+                        </form>
+
                     </td>
 
                 </tr>
