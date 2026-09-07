@@ -3,6 +3,8 @@
 # ==========================================================
 
 from flask import Flask, render_template, request, redirect, url_for
+import sqlite3
+from pathlib import Path
 
 from forms.producto_form import ProductoForm
 from forms.cliente_form import ClienteForm
@@ -20,42 +22,114 @@ app.config['SECRET_KEY'] = 'clave-secreta-desarrollo'
 
 
 # ==========================================================
+# CONFIGURACIÓN DE BASE DE DATOS
+# ==========================================================
+
+BASE_DIR = Path(__file__).resolve().parent
+DB_PATH = BASE_DIR / 'data' / 'sistema.db'
+
+
+def obtener_conexion():
+    conexion = sqlite3.connect(DB_PATH)
+    conexion.row_factory = sqlite3.Row
+    return conexion
+
+# ==========================================================
+# CREAR TABLA DE PRODUCTOS
+# ==========================================================
+
+def crear_tabla_productos():
+
+    conn = obtener_conexion()
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS productos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT NOT NULL,
+            categoria TEXT NOT NULL,
+            precio REAL NOT NULL,
+            stock INTEGER NOT NULL
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+crear_tabla_productos()
+
+# ==========================================================
+# CREAR TABLA DE CLIENTES
+# ==========================================================
+
+def crear_tabla_clientes():
+
+    conn = obtener_conexion()
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS clientes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT NOT NULL,
+            correo TEXT NOT NULL,
+            telefono TEXT NOT NULL
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+crear_tabla_clientes()
+
+# ==========================================================
+# CREAR TABLA DE FACTURAS
+# ==========================================================
+
+def crear_tabla_facturas():
+
+    conn = obtener_conexion()
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS facturas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            numero TEXT NOT NULL,
+            cliente TEXT NOT NULL,
+            total REAL NOT NULL
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+crear_tabla_facturas()
+
+# ==========================================================
+# CREAR TABLA DE PROVEEDORES
+# ==========================================================
+
+def crear_tabla_proveedores():
+
+    conn = obtener_conexion()
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS proveedores (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT NOT NULL,
+            contacto TEXT NOT NULL,
+            producto TEXT NOT NULL
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+crear_tabla_proveedores()
+
+# ==========================================================
 # RUTA PRINCIPAL
 # ==========================================================
 
 @app.route('/')
 def inicio():
     return render_template('index.html')
-
-
-# ==========================================================
-# DATOS TEMPORALES DE PRODUCTOS
-# ==========================================================
-
-lista_productos = [
-    {
-        "id": 1,
-        "nombre": "Computadora portátil",
-        "categoria": "Computación",
-        "precio": 850.00,
-        "stock": 5
-    },
-    {
-        "id": 2,
-        "nombre": "Teclado inalámbrico",
-        "categoria": "Accesorios",
-        "precio": 35.00,
-        "stock": 10
-    },
-    {
-        "id": 3,
-        "nombre": "Mouse inalámbrico",
-        "categoria": "Accesorios",
-        "precio": 20.00,
-        "stock": 0
-    }
-]
-
 
 # ==========================================================
 # PRODUCTOS - LISTAR
@@ -64,9 +138,17 @@ lista_productos = [
 @app.route('/productos', methods=['GET', 'POST'])
 def productos():
 
-    return render_template(
+     conn = obtener_conexion()
+
+     productos = conn.execute(
+        'SELECT * FROM productos'
+    ).fetchall()
+
+     conn.close()
+
+     return render_template(
         'productos.html',
-        productos=lista_productos
+        productos=productos
     )
 
 
@@ -81,15 +163,20 @@ def formulario_producto():
 
     if form.validate_on_submit():
 
-        nuevo_producto = {
-            "id": len(lista_productos) + 1,
-            "nombre": form.nombre.data,
-            "categoria": form.categoria.data,
-            "precio": form.precio.data,
-            "stock": form.stock.data
-        }
+        conn = obtener_conexion()
 
-        lista_productos.append(nuevo_producto)
+        conn.execute("""
+            INSERT INTO productos (nombre, categoria, precio, stock)
+            VALUES (?, ?, ?, ?)
+        """, (
+            form.nombre.data,
+            form.categoria.data,
+            form.precio.data,
+            form.stock.data
+        ))
+
+        conn.commit()
+        conn.close()
 
         return redirect(url_for('productos'))
 
@@ -107,10 +194,14 @@ def formulario_producto():
 @app.route('/editar_producto/<int:id>', methods=['GET', 'POST'])
 def editar_producto(id):
 
-    producto = next(
-        (p for p in lista_productos if p["id"] == id),
-        None
-    )
+    conn = obtener_conexion()
+
+    producto = conn.execute(
+        'SELECT * FROM productos WHERE id = ?',
+        (id,)
+    ).fetchone()
+
+    conn.close()
 
     if producto is None:
         return redirect(url_for('productos'))
@@ -126,10 +217,22 @@ def editar_producto(id):
 
     if form.validate_on_submit():
 
-        producto["nombre"] = form.nombre.data
-        producto["categoria"] = form.categoria.data
-        producto["precio"] = form.precio.data
-        producto["stock"] = form.stock.data
+        conn = obtener_conexion()
+
+        conn.execute("""
+            UPDATE productos
+            SET nombre = ?, categoria = ?, precio = ?, stock = ?
+            WHERE id = ?
+        """, (
+            form.nombre.data,
+            form.categoria.data,
+            form.precio.data,
+            form.stock.data,
+            id
+        ))
+
+        conn.commit()
+        conn.close()
 
         return redirect(url_for('productos'))
 
@@ -140,6 +243,7 @@ def editar_producto(id):
     )
 
 
+
 # ==========================================================
 # PRODUCTOS - ELIMINAR
 # ==========================================================
@@ -147,74 +251,42 @@ def editar_producto(id):
 @app.route('/eliminar_producto/<int:id>', methods=['POST'])
 def eliminar_producto(id):
 
-    producto = next(
-        (p for p in lista_productos if p["id"] == id),
-        None
+   
+    conn = obtener_conexion()
+
+    conn.execute(
+        'DELETE FROM productos WHERE id = ?',
+        (id,)
     )
 
-    if producto:
-        lista_productos.remove(producto)
+    conn.commit()
+    conn.close()
 
     return redirect(url_for('productos'))
 
 
-# ==========================================================
-# DATOS TEMPORALES DE CLIENTES
-# ==========================================================
-
-clientes_registrados = [
-    {
-        "id": 1,
-        "nombre": "María González",
-        "correo": "maria@email.com",
-        "telefono": "0991111111"
-    },
-    {
-        "id": 2,
-        "nombre": "Juan Pérez",
-        "correo": "juan@email.com",
-        "telefono": "0982222222"
-    },
-    {
-        "id": 3,
-        "nombre": "Ana Rodríguez",
-        "correo": "ana@email.com",
-        "telefono": "0973333333"
-    }
-]
-
-
-# ==========================================================
-# CLIENTES - LISTAR Y REGISTRAR
-# ==========================================================
-
 @app.route('/clientes', methods=['GET', 'POST'])
 def clientes():
 
+    conn = obtener_conexion()
+
+    clientes = conn.execute(
+        'SELECT * FROM clientes'
+    ).fetchall()
+
+    conn.close()
+
     form = ClienteForm()
-
-    if form.validate_on_submit():
-
-        nuevo_cliente = {
-            "id": len(clientes_registrados) + 1,
-            "nombre": form.nombre.data,
-            "correo": form.correo.data,
-            "telefono": form.telefono.data
-        }
-
-        clientes_registrados.append(nuevo_cliente)
-
-        return redirect(url_for('clientes'))
 
     return render_template(
         'clientes.html',
-        clientes=clientes_registrados,
+        clientes=clientes,
         form=form
     )
 
 
 # ==========================================================
-# CLIENTES - FORMULARIO
+# CLIENTES - REGISTRAR
 # ==========================================================
 
 @app.route('/formulario_cliente', methods=['GET', 'POST'])
@@ -224,14 +296,19 @@ def formulario_cliente():
 
     if form.validate_on_submit():
 
-        nuevo_cliente = {
-            "id": len(clientes_registrados) + 1,
-            "nombre": form.nombre.data,
-            "correo": form.correo.data,
-            "telefono": form.telefono.data
-        }
+        conn = obtener_conexion()
 
-        clientes_registrados.append(nuevo_cliente)
+        conn.execute("""
+            INSERT INTO clientes (nombre, correo, telefono)
+            VALUES (?, ?, ?)
+        """, (
+            form.nombre.data,
+            form.correo.data,
+            form.telefono.data
+        ))
+
+        conn.commit()
+        conn.close()
 
         return redirect(url_for('clientes'))
 
@@ -249,10 +326,14 @@ def formulario_cliente():
 @app.route('/editar_cliente/<int:id>', methods=['GET', 'POST'])
 def editar_cliente(id):
 
-    cliente = next(
-        (c for c in clientes_registrados if c["id"] == id),
-        None
-    )
+    conn = obtener_conexion()
+
+    cliente = conn.execute(
+        'SELECT * FROM clientes WHERE id = ?',
+        (id,)
+    ).fetchone()
+
+    conn.close()
 
     if cliente is None:
         return redirect(url_for('clientes'))
@@ -261,15 +342,27 @@ def editar_cliente(id):
 
     if request.method == 'GET':
 
-        form.nombre.data = cliente["nombre"]
-        form.correo.data = cliente["correo"]
-        form.telefono.data = cliente["telefono"]
+        form.nombre.data = cliente['nombre']
+        form.correo.data = cliente['correo']
+        form.telefono.data = cliente['telefono']
 
     if form.validate_on_submit():
 
-        cliente["nombre"] = form.nombre.data
-        cliente["correo"] = form.correo.data
-        cliente["telefono"] = form.telefono.data
+        conn = obtener_conexion()
+
+        conn.execute("""
+            UPDATE clientes
+            SET nombre = ?, correo = ?, telefono = ?
+            WHERE id = ?
+        """, (
+            form.nombre.data,
+            form.correo.data,
+            form.telefono.data,
+            id
+        ))
+
+        conn.commit()
+        conn.close()
 
         return redirect(url_for('clientes'))
 
@@ -287,74 +380,44 @@ def editar_cliente(id):
 @app.route('/eliminar_cliente/<int:id>', methods=['POST'])
 def eliminar_cliente(id):
 
-    cliente = next(
-        (c for c in clientes_registrados if c["id"] == id),
-        None
+    conn = obtener_conexion()
+
+    conn.execute(
+        'DELETE FROM clientes WHERE id = ?',
+        (id,)
     )
 
-    if cliente:
-        clientes_registrados.remove(cliente)
+    conn.commit()
+    conn.close()
 
     return redirect(url_for('clientes'))
 
-
 # ==========================================================
-# DATOS TEMPORALES DE PROVEEDORES
-# ==========================================================
-
-lista_proveedores = [
-    {
-        "id": 1,
-        "nombre": "Tech Ecuador",
-        "contacto": "0991234567",
-        "producto": "Equipos tecnológicos"
-    },
-    {
-        "id": 2,
-        "nombre": "Digital Solutions",
-        "contacto": "0987654321",
-        "producto": "Accesorios informáticos"
-    },
-    {
-        "id": 3,
-        "nombre": "Distribuidora Nacional",
-        "contacto": "0965555555",
-        "producto": "Suministros de oficina"
-    }
-]
-
-
-# ==========================================================
-# PROVEEDORES - LISTAR Y REGISTRAR
+# PROVEEDORES - LISTAR
 # ==========================================================
 
 @app.route('/proveedores', methods=['GET', 'POST'])
 def proveedores():
 
+    conn = obtener_conexion()
+
+    proveedores = conn.execute(
+        'SELECT * FROM proveedores'
+    ).fetchall()
+
+    conn.close()
+
     form = ProveedorForm()
-
-    if form.validate_on_submit():
-
-        nuevo_proveedor = {
-            "id": len(lista_proveedores) + 1,
-            "nombre": form.nombre.data,
-            "contacto": form.contacto.data,
-            "producto": form.producto.data
-        }
-
-        lista_proveedores.append(nuevo_proveedor)
-
-        return redirect(url_for('proveedores'))
 
     return render_template(
         'proveedores.html',
-        proveedores=lista_proveedores,
+        proveedores=proveedores,
         form=form
     )
 
 
 # ==========================================================
-# PROVEEDORES - FORMULARIO
+# PROVEEDORES - REGISTRAR
 # ==========================================================
 
 @app.route('/formulario_proveedor', methods=['GET', 'POST'])
@@ -364,14 +427,19 @@ def formulario_proveedor():
 
     if form.validate_on_submit():
 
-        nuevo_proveedor = {
-            "id": len(lista_proveedores) + 1,
-            "nombre": form.nombre.data,
-            "contacto": form.contacto.data,
-            "producto": form.producto.data
-        }
+        conn = obtener_conexion()
 
-        lista_proveedores.append(nuevo_proveedor)
+        conn.execute("""
+            INSERT INTO proveedores (nombre, contacto, producto)
+            VALUES (?, ?, ?)
+        """, (
+            form.nombre.data,
+            form.contacto.data,
+            form.producto.data
+        ))
+
+        conn.commit()
+        conn.close()
 
         return redirect(url_for('proveedores'))
 
@@ -389,10 +457,14 @@ def formulario_proveedor():
 @app.route('/editar_proveedor/<int:id>', methods=['GET', 'POST'])
 def editar_proveedor(id):
 
-    proveedor = next(
-        (p for p in lista_proveedores if p["id"] == id),
-        None
-    )
+    conn = obtener_conexion()
+
+    proveedor = conn.execute(
+        'SELECT * FROM proveedores WHERE id = ?',
+        (id,)
+    ).fetchone()
+
+    conn.close()
 
     if proveedor is None:
         return redirect(url_for('proveedores'))
@@ -401,15 +473,27 @@ def editar_proveedor(id):
 
     if request.method == 'GET':
 
-        form.nombre.data = proveedor["nombre"]
-        form.contacto.data = proveedor["contacto"]
-        form.producto.data = proveedor["producto"]
+        form.nombre.data = proveedor['nombre']
+        form.contacto.data = proveedor['contacto']
+        form.producto.data = proveedor['producto']
 
     if form.validate_on_submit():
 
-        proveedor["nombre"] = form.nombre.data
-        proveedor["contacto"] = form.contacto.data
-        proveedor["producto"] = form.producto.data
+        conn = obtener_conexion()
+
+        conn.execute("""
+            UPDATE proveedores
+            SET nombre = ?, contacto = ?, producto = ?
+            WHERE id = ?
+        """, (
+            form.nombre.data,
+            form.contacto.data,
+            form.producto.data,
+            id
+        ))
+
+        conn.commit()
+        conn.close()
 
         return redirect(url_for('proveedores'))
 
@@ -427,74 +511,44 @@ def editar_proveedor(id):
 @app.route('/eliminar_proveedor/<int:id>', methods=['POST'])
 def eliminar_proveedor(id):
 
-    proveedor = next(
-        (p for p in lista_proveedores if p["id"] == id),
-        None
+    conn = obtener_conexion()
+
+    conn.execute(
+        'DELETE FROM proveedores WHERE id = ?',
+        (id,)
     )
 
-    if proveedor:
-        lista_proveedores.remove(proveedor)
+    conn.commit()
+    conn.close()
 
     return redirect(url_for('proveedores'))
 
-
 # ==========================================================
-# DATOS TEMPORALES DE FACTURACIÓN
-# ==========================================================
-
-lista_facturas = [
-    {
-        "id": 1,
-        "numero": "FAC-001",
-        "cliente": "María González",
-        "total": 150.00
-    },
-    {
-        "id": 2,
-        "numero": "FAC-002",
-        "cliente": "Juan Pérez",
-        "total": 275.50
-    },
-    {
-        "id": 3,
-        "numero": "FAC-003",
-        "cliente": "Ana Rodríguez",
-        "total": 89.99
-    }
-]
-
-
-# ==========================================================
-# FACTURACIÓN - LISTAR Y REGISTRAR
+# FACTURACIÓN - LISTAR
 # ==========================================================
 
 @app.route('/facturacion', methods=['GET', 'POST'])
 def facturacion():
 
+    conn = obtener_conexion()
+
+    facturas = conn.execute(
+        'SELECT * FROM facturas'
+    ).fetchall()
+
+    conn.close()
+
     form = FacturacionForm()
-
-    if form.validate_on_submit():
-
-        nueva_factura = {
-            "id": len(lista_facturas) + 1,
-            "numero": form.numero.data,
-            "cliente": form.cliente.data,
-            "total": form.total.data
-        }
-
-        lista_facturas.append(nueva_factura)
-
-        return redirect(url_for('facturacion'))
 
     return render_template(
         'facturacion.html',
-        facturas=lista_facturas,
+        facturas=facturas,
         form=form
     )
 
 
 # ==========================================================
-# FACTURACIÓN - FORMULARIO
+# FACTURACIÓN - REGISTRAR
 # ==========================================================
 
 @app.route('/formulario_facturacion', methods=['GET', 'POST'])
@@ -504,14 +558,19 @@ def formulario_facturacion():
 
     if form.validate_on_submit():
 
-        nueva_factura = {
-            "id": len(lista_facturas) + 1,
-            "numero": form.numero.data,
-            "cliente": form.cliente.data,
-            "total": form.total.data
-        }
+        conn = obtener_conexion()
 
-        lista_facturas.append(nueva_factura)
+        conn.execute("""
+            INSERT INTO facturas (numero, cliente, total)
+            VALUES (?, ?, ?)
+        """, (
+            form.numero.data,
+            form.cliente.data,
+            form.total.data
+        ))
+
+        conn.commit()
+        conn.close()
 
         return redirect(url_for('facturacion'))
 
@@ -529,10 +588,14 @@ def formulario_facturacion():
 @app.route('/editar_factura/<int:id>', methods=['GET', 'POST'])
 def editar_factura(id):
 
-    factura = next(
-        (f for f in lista_facturas if f["id"] == id),
-        None
-    )
+    conn = obtener_conexion()
+
+    factura = conn.execute(
+        'SELECT * FROM facturas WHERE id = ?',
+        (id,)
+    ).fetchone()
+
+    conn.close()
 
     if factura is None:
         return redirect(url_for('facturacion'))
@@ -541,15 +604,27 @@ def editar_factura(id):
 
     if request.method == 'GET':
 
-        form.numero.data = factura["numero"]
-        form.cliente.data = factura["cliente"]
-        form.total.data = factura["total"]
+        form.numero.data = factura['numero']
+        form.cliente.data = factura['cliente']
+        form.total.data = factura['total']
 
     if form.validate_on_submit():
 
-        factura["numero"] = form.numero.data
-        factura["cliente"] = form.cliente.data
-        factura["total"] = form.total.data
+        conn = obtener_conexion()
+
+        conn.execute("""
+            UPDATE facturas
+            SET numero = ?, cliente = ?, total = ?
+            WHERE id = ?
+        """, (
+            form.numero.data,
+            form.cliente.data,
+            form.total.data,
+            id
+        ))
+
+        conn.commit()
+        conn.close()
 
         return redirect(url_for('facturacion'))
 
@@ -567,13 +642,15 @@ def editar_factura(id):
 @app.route('/eliminar_factura/<int:id>', methods=['POST'])
 def eliminar_factura(id):
 
-    factura = next(
-        (f for f in lista_facturas if f["id"] == id),
-        None
+    conn = obtener_conexion()
+
+    conn.execute(
+        'DELETE FROM facturas WHERE id = ?',
+        (id,)
     )
 
-    if factura:
-        lista_facturas.remove(factura)
+    conn.commit()
+    conn.close()
 
     return redirect(url_for('facturacion'))
 
