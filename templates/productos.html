@@ -40,6 +40,7 @@ Productos - Sistema de Ventas
                         <th>Categoría</th>
                         <th>Precio</th>
                         <th>Stock</th>
+                        <th>Proveedor</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
@@ -72,6 +73,10 @@ Productos - Sistema de Ventas
                             {{ producto.stock }}
                         </td>
 
+                        <td>
+                        {{ producto.proveedor or 'Sin proveedor' }}
+                        </td>
+                        
                         <td>
 
                             {% if producto.stock > 0 %}

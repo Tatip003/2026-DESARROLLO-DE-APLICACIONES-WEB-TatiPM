@@ -3,13 +3,12 @@
 # ==========================================================
 
 from flask import Flask, render_template, request, redirect, url_for
-import sqlite3
-from pathlib import Path
 
 from forms.producto_form import ProductoForm
 from forms.cliente_form import ClienteForm
 from forms.proveedor_form import ProveedorForm
 from forms.facturacion_form import FacturacionForm
+from conexion.conexion import obtener_conexion
 
 
 # ==========================================================
@@ -22,108 +21,6 @@ app.config['SECRET_KEY'] = 'clave-secreta-desarrollo'
 
 
 # ==========================================================
-# CONFIGURACIÓN DE BASE DE DATOS
-# ==========================================================
-
-BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / 'data' / 'sistema.db'
-
-
-def obtener_conexion():
-    conexion = sqlite3.connect(DB_PATH)
-    conexion.row_factory = sqlite3.Row
-    return conexion
-
-# ==========================================================
-# CREAR TABLA DE PRODUCTOS
-# ==========================================================
-
-def crear_tabla_productos():
-
-    conn = obtener_conexion()
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS productos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL,
-            categoria TEXT NOT NULL,
-            precio REAL NOT NULL,
-            stock INTEGER NOT NULL
-        )
-    """)
-
-    conn.commit()
-    conn.close()
-
-crear_tabla_productos()
-
-# ==========================================================
-# CREAR TABLA DE CLIENTES
-# ==========================================================
-
-def crear_tabla_clientes():
-
-    conn = obtener_conexion()
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS clientes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL,
-            correo TEXT NOT NULL,
-            telefono TEXT NOT NULL
-        )
-    """)
-
-    conn.commit()
-    conn.close()
-
-crear_tabla_clientes()
-
-# ==========================================================
-# CREAR TABLA DE FACTURAS
-# ==========================================================
-
-def crear_tabla_facturas():
-
-    conn = obtener_conexion()
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS facturas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            numero TEXT NOT NULL,
-            cliente TEXT NOT NULL,
-            total REAL NOT NULL
-        )
-    """)
-
-    conn.commit()
-    conn.close()
-
-crear_tabla_facturas()
-
-# ==========================================================
-# CREAR TABLA DE PROVEEDORES
-# ==========================================================
-
-def crear_tabla_proveedores():
-
-    conn = obtener_conexion()
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS proveedores (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL,
-            contacto TEXT NOT NULL,
-            producto TEXT NOT NULL
-        )
-    """)
-
-    conn.commit()
-    conn.close()
-
-crear_tabla_proveedores()
-
-# ==========================================================
 # RUTA PRINCIPAL
 # ==========================================================
 
@@ -131,22 +28,37 @@ crear_tabla_proveedores()
 def inicio():
     return render_template('index.html')
 
+
 # ==========================================================
 # PRODUCTOS - LISTAR
 # ==========================================================
 
-@app.route('/productos', methods=['GET', 'POST'])
+@app.route('/productos', methods=['GET'])
 def productos():
 
-     conn = obtener_conexion()
+    conn = obtener_conexion()
+    cursor = conn.cursor(dictionary=True)
 
-     productos = conn.execute(
-        'SELECT * FROM productos'
-    ).fetchall()
+    cursor.execute("""
+    SELECT
+        p.id_producto AS id,
+        p.nombre,
+        p.categoria,
+        p.precio,
+        p.stock,
+        pr.nombre AS proveedor
+    FROM productos p
+    LEFT JOIN proveedores pr
+        ON p.id_proveedor = pr.id_proveedor
+    ORDER BY p.id_producto
+""")
 
-     conn.close()
+    productos = cursor.fetchall()
 
-     return render_template(
+    cursor.close()
+    conn.close()
+
+    return render_template(
         'productos.html',
         productos=productos
     )
@@ -161,21 +73,54 @@ def formulario_producto():
 
     form = ProductoForm()
 
+    conn = obtener_conexion()
+    cursor = conn.cursor(dictionary=True)
+
+    # Obtener proveedores desde MySQL
+    cursor.execute("""
+        SELECT
+            id_proveedor,
+            nombre
+        FROM proveedores
+        ORDER BY nombre
+    """)
+
+    proveedores = cursor.fetchall()
+
+    # Mostrar en PowerShell los proveedores encontrados
+    print("PROVEEDORES ENCONTRADOS:", proveedores)
+
+    cursor.close()
+    conn.close()
+
+    # Cargar los proveedores en el campo desplegable
+    form.proveedor.choices = [
+        (proveedor['id_proveedor'], proveedor['nombre'])
+        for proveedor in proveedores
+    ]
+
+    # Registrar producto
     if form.validate_on_submit():
 
         conn = obtener_conexion()
+        cursor = conn.cursor()
 
-        conn.execute("""
-            INSERT INTO productos (nombre, categoria, precio, stock)
-            VALUES (?, ?, ?, ?)
+        cursor.execute("""
+            INSERT INTO productos
+                (nombre, categoria, precio, stock, id_proveedor)
+            VALUES
+                (%s, %s, %s, %s, %s)
         """, (
             form.nombre.data,
             form.categoria.data,
             form.precio.data,
-            form.stock.data
+            form.stock.data,
+            form.proveedor.data
         ))
 
         conn.commit()
+
+        cursor.close()
         conn.close()
 
         return redirect(url_for('productos'))
@@ -186,7 +131,6 @@ def formulario_producto():
         editar=False
     )
 
-
 # ==========================================================
 # PRODUCTOS - EDITAR
 # ==========================================================
@@ -195,43 +139,85 @@ def formulario_producto():
 def editar_producto(id):
 
     conn = obtener_conexion()
+    cursor = conn.cursor(dictionary=True)
 
-    producto = conn.execute(
-        'SELECT * FROM productos WHERE id = ?',
-        (id,)
-    ).fetchone()
+    # Obtener el producto
+    cursor.execute("""
+        SELECT
+            id_producto AS id,
+            nombre,
+            categoria,
+            precio,
+            stock,
+            id_proveedor
+        FROM productos
+        WHERE id_producto = %s
+    """, (id,))
 
+    producto = cursor.fetchone()
+
+    # Obtener los proveedores
+    cursor.execute("""
+        SELECT
+            id_proveedor,
+            nombre
+        FROM proveedores
+        ORDER BY nombre
+    """)
+
+    proveedores = cursor.fetchall()
+
+    cursor.close()
     conn.close()
 
+    # Si el producto no existe
     if producto is None:
         return redirect(url_for('productos'))
 
     form = ProductoForm()
 
+    # Cargar proveedores en el campo desplegable
+    form.proveedor.choices = [
+        (proveedor['id_proveedor'], proveedor['nombre'])
+        for proveedor in proveedores
+    ]
+
+    # Mostrar los datos actuales del producto
     if request.method == 'GET':
 
-        form.nombre.data = producto["nombre"]
-        form.categoria.data = producto["categoria"]
-        form.precio.data = producto["precio"]
-        form.stock.data = producto["stock"]
+        form.nombre.data = producto['nombre']
+        form.categoria.data = producto['categoria']
+        form.precio.data = producto['precio']
+        form.stock.data = producto['stock']
+        form.proveedor.data = producto['id_proveedor']
 
+    # Actualizar producto
     if form.validate_on_submit():
 
         conn = obtener_conexion()
+        cursor = conn.cursor()
 
-        conn.execute("""
+        cursor.execute("""
             UPDATE productos
-            SET nombre = ?, categoria = ?, precio = ?, stock = ?
-            WHERE id = ?
+            SET
+                nombre = %s,
+                categoria = %s,
+                precio = %s,
+                stock = %s,
+                id_proveedor = %s
+            WHERE id_producto = %s
         """, (
             form.nombre.data,
             form.categoria.data,
             form.precio.data,
             form.stock.data,
+            form.proveedor.data,
             id
         ))
 
         conn.commit()
+
+        cursor.close()
         conn.close()
 
         return redirect(url_for('productos'))
@@ -243,7 +229,6 @@ def editar_producto(id):
     )
 
 
-
 # ==========================================================
 # PRODUCTOS - ELIMINAR
 # ==========================================================
@@ -251,37 +236,53 @@ def editar_producto(id):
 @app.route('/eliminar_producto/<int:id>', methods=['POST'])
 def eliminar_producto(id):
 
-   
     conn = obtener_conexion()
+    cursor = conn.cursor()
 
-    conn.execute(
-        'DELETE FROM productos WHERE id = ?',
+    cursor.execute(
+        """
+        DELETE FROM productos
+        WHERE id_producto = %s
+        """,
         (id,)
     )
 
     conn.commit()
+
+    cursor.close()
     conn.close()
 
     return redirect(url_for('productos'))
 
 
-@app.route('/clientes', methods=['GET', 'POST'])
+# ==========================================================
+# CLIENTES - LISTAR
+# ==========================================================
+
+@app.route('/clientes', methods=['GET'])
 def clientes():
 
     conn = obtener_conexion()
+    cursor = conn.cursor(dictionary=True)
 
-    clientes = conn.execute(
-        'SELECT * FROM clientes'
-    ).fetchall()
+    cursor.execute("""
+        SELECT
+            id_cliente AS id,
+            nombre,
+            correo,
+            telefono
+        FROM clientes
+        ORDER BY id_cliente
+    """)
 
+    clientes = cursor.fetchall()
+
+    cursor.close()
     conn.close()
-
-    form = ClienteForm()
 
     return render_template(
         'clientes.html',
-        clientes=clientes,
-        form=form
+        clientes=clientes
     )
 
 
@@ -297,10 +298,12 @@ def formulario_cliente():
     if form.validate_on_submit():
 
         conn = obtener_conexion()
+        cursor = conn.cursor()
 
-        conn.execute("""
-            INSERT INTO clientes (nombre, correo, telefono)
-            VALUES (?, ?, ?)
+        cursor.execute("""
+            INSERT INTO clientes
+            (nombre, correo, telefono)
+            VALUES (%s, %s, %s)
         """, (
             form.nombre.data,
             form.correo.data,
@@ -308,6 +311,8 @@ def formulario_cliente():
         ))
 
         conn.commit()
+
+        cursor.close()
         conn.close()
 
         return redirect(url_for('clientes'))
@@ -327,12 +332,21 @@ def formulario_cliente():
 def editar_cliente(id):
 
     conn = obtener_conexion()
+    cursor = conn.cursor(dictionary=True)
 
-    cliente = conn.execute(
-        'SELECT * FROM clientes WHERE id = ?',
-        (id,)
-    ).fetchone()
+    cursor.execute("""
+        SELECT
+            id_cliente AS id,
+            nombre,
+            correo,
+            telefono
+        FROM clientes
+        WHERE id_cliente = %s
+    """, (id,))
 
+    cliente = cursor.fetchone()
+
+    cursor.close()
     conn.close()
 
     if cliente is None:
@@ -349,11 +363,14 @@ def editar_cliente(id):
     if form.validate_on_submit():
 
         conn = obtener_conexion()
+        cursor = conn.cursor()
 
-        conn.execute("""
+        cursor.execute("""
             UPDATE clientes
-            SET nombre = ?, correo = ?, telefono = ?
-            WHERE id = ?
+            SET nombre = %s,
+                correo = %s,
+                telefono = %s
+            WHERE id_cliente = %s
         """, (
             form.nombre.data,
             form.correo.data,
@@ -362,6 +379,8 @@ def editar_cliente(id):
         ))
 
         conn.commit()
+
+        cursor.close()
         conn.close()
 
         return redirect(url_for('clientes'))
@@ -381,30 +400,47 @@ def editar_cliente(id):
 def eliminar_cliente(id):
 
     conn = obtener_conexion()
+    cursor = conn.cursor()
 
-    conn.execute(
-        'DELETE FROM clientes WHERE id = ?',
+    cursor.execute(
+        """
+        DELETE FROM clientes
+        WHERE id_cliente = %s
+        """,
         (id,)
     )
 
     conn.commit()
+
+    cursor.close()
     conn.close()
 
     return redirect(url_for('clientes'))
+
 
 # ==========================================================
 # PROVEEDORES - LISTAR
 # ==========================================================
 
-@app.route('/proveedores', methods=['GET', 'POST'])
+@app.route('/proveedores', methods=['GET'])
 def proveedores():
 
     conn = obtener_conexion()
+    cursor = conn.cursor(dictionary=True)
 
-    proveedores = conn.execute(
-        'SELECT * FROM proveedores'
-    ).fetchall()
+    cursor.execute("""
+        SELECT
+            id_proveedor AS id,
+            nombre,
+            contacto,
+            producto
+        FROM proveedores
+        ORDER BY id_proveedor
+    """)
 
+    proveedores = cursor.fetchall()
+
+    cursor.close()
     conn.close()
 
     form = ProveedorForm()
@@ -428,10 +464,15 @@ def formulario_proveedor():
     if form.validate_on_submit():
 
         conn = obtener_conexion()
+        cursor = conn.cursor()
 
-        conn.execute("""
-            INSERT INTO proveedores (nombre, contacto, producto)
-            VALUES (?, ?, ?)
+        cursor.execute("""
+            INSERT INTO proveedores (
+                nombre,
+                contacto,
+                producto
+            )
+            VALUES (%s, %s, %s)
         """, (
             form.nombre.data,
             form.contacto.data,
@@ -439,6 +480,8 @@ def formulario_proveedor():
         ))
 
         conn.commit()
+
+        cursor.close()
         conn.close()
 
         return redirect(url_for('proveedores'))
@@ -458,33 +501,50 @@ def formulario_proveedor():
 def editar_proveedor(id):
 
     conn = obtener_conexion()
+    cursor = conn.cursor(dictionary=True)
 
-    proveedor = conn.execute(
-        'SELECT * FROM proveedores WHERE id = ?',
-        (id,)
-    ).fetchone()
+    # Buscar proveedor por ID
+    cursor.execute("""
+        SELECT
+            id_proveedor AS id,
+            nombre,
+            contacto,
+            producto
+        FROM proveedores
+        WHERE id_proveedor = %s
+    """, (id,))
 
+    proveedor = cursor.fetchone()
+
+    cursor.close()
     conn.close()
 
+    # Si el proveedor no existe, regresar al listado
     if proveedor is None:
         return redirect(url_for('proveedores'))
 
     form = ProveedorForm()
 
+    # Cargar los datos actuales en el formulario
     if request.method == 'GET':
 
         form.nombre.data = proveedor['nombre']
         form.contacto.data = proveedor['contacto']
         form.producto.data = proveedor['producto']
 
+    # Validar y actualizar
     if form.validate_on_submit():
 
         conn = obtener_conexion()
+        cursor = conn.cursor()
 
-        conn.execute("""
+        cursor.execute("""
             UPDATE proveedores
-            SET nombre = ?, contacto = ?, producto = ?
-            WHERE id = ?
+            SET
+                nombre = %s,
+                contacto = %s,
+                producto = %s
+            WHERE id_proveedor = %s
         """, (
             form.nombre.data,
             form.contacto.data,
@@ -493,6 +553,8 @@ def editar_proveedor(id):
         ))
 
         conn.commit()
+
+        cursor.close()
         conn.close()
 
         return redirect(url_for('proveedores'))
@@ -512,30 +574,47 @@ def editar_proveedor(id):
 def eliminar_proveedor(id):
 
     conn = obtener_conexion()
+    cursor = conn.cursor()
 
-    conn.execute(
-        'DELETE FROM proveedores WHERE id = ?',
-        (id,)
-    )
+    cursor.execute("""
+        DELETE FROM proveedores
+        WHERE id_proveedor = %s
+    """, (id,))
 
     conn.commit()
+
+    cursor.close()
     conn.close()
 
     return redirect(url_for('proveedores'))
+
 
 # ==========================================================
 # FACTURACIÓN - LISTAR
 # ==========================================================
 
-@app.route('/facturacion', methods=['GET', 'POST'])
+@app.route('/facturacion', methods=['GET'])
 def facturacion():
 
     conn = obtener_conexion()
+    cursor = conn.cursor(dictionary=True)
 
-    facturas = conn.execute(
-        'SELECT * FROM facturas'
-    ).fetchall()
+    cursor.execute("""
+        SELECT
+            f.id_factura AS id,
+            f.numero,
+            f.id_cliente,
+            c.nombre AS cliente,
+            f.total
+        FROM facturas f
+        INNER JOIN clientes c
+            ON f.id_cliente = c.id_cliente
+        ORDER BY f.id_factura
+    """)
 
+    facturas = cursor.fetchall()
+
+    cursor.close()
     conn.close()
 
     form = FacturacionForm()
@@ -559,10 +638,12 @@ def formulario_facturacion():
     if form.validate_on_submit():
 
         conn = obtener_conexion()
+        cursor = conn.cursor()
 
-        conn.execute("""
-            INSERT INTO facturas (numero, cliente, total)
-            VALUES (?, ?, ?)
+        cursor.execute("""
+            INSERT INTO facturas
+            (numero, id_cliente, total)
+            VALUES (%s, %s, %s)
         """, (
             form.numero.data,
             form.cliente.data,
@@ -570,6 +651,8 @@ def formulario_facturacion():
         ))
 
         conn.commit()
+
+        cursor.close()
         conn.close()
 
         return redirect(url_for('facturacion'))
@@ -589,12 +672,21 @@ def formulario_facturacion():
 def editar_factura(id):
 
     conn = obtener_conexion()
+    cursor = conn.cursor(dictionary=True)
 
-    factura = conn.execute(
-        'SELECT * FROM facturas WHERE id = ?',
-        (id,)
-    ).fetchone()
+    cursor.execute("""
+        SELECT
+            id_factura AS id,
+            numero,
+            id_cliente,
+            total
+        FROM facturas
+        WHERE id_factura = %s
+    """, (id,))
 
+    factura = cursor.fetchone()
+
+    cursor.close()
     conn.close()
 
     if factura is None:
@@ -605,17 +697,20 @@ def editar_factura(id):
     if request.method == 'GET':
 
         form.numero.data = factura['numero']
-        form.cliente.data = factura['cliente']
+        form.cliente.data = factura['id_cliente']
         form.total.data = factura['total']
 
     if form.validate_on_submit():
 
         conn = obtener_conexion()
+        cursor = conn.cursor()
 
-        conn.execute("""
+        cursor.execute("""
             UPDATE facturas
-            SET numero = ?, cliente = ?, total = ?
-            WHERE id = ?
+            SET numero = %s,
+                id_cliente = %s,
+                total = %s
+            WHERE id_factura = %s
         """, (
             form.numero.data,
             form.cliente.data,
@@ -624,6 +719,8 @@ def editar_factura(id):
         ))
 
         conn.commit()
+
+        cursor.close()
         conn.close()
 
         return redirect(url_for('facturacion'))
@@ -643,13 +740,19 @@ def editar_factura(id):
 def eliminar_factura(id):
 
     conn = obtener_conexion()
+    cursor = conn.cursor()
 
-    conn.execute(
-        'DELETE FROM facturas WHERE id = ?',
+    cursor.execute(
+        """
+        DELETE FROM facturas
+        WHERE id_factura = %s
+        """,
         (id,)
     )
 
     conn.commit()
+
+    cursor.close()
     conn.close()
 
     return redirect(url_for('facturacion'))
