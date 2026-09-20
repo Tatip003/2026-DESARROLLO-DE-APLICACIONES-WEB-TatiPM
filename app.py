@@ -4,10 +4,29 @@
 
 from flask import Flask, render_template, request, redirect, url_for
 
+from flask_login import (
+    LoginManager,
+    login_user,
+    logout_user,
+    login_required,
+    current_user
+)
+
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash
+)
+
+from forms.login_form import LoginForm
+from forms.usuario_form import UsuarioForm
+
+from models import obtener_usuario_por_id
+
 from forms.producto_form import ProductoForm
 from forms.cliente_form import ClienteForm
 from forms.proveedor_form import ProveedorForm
 from forms.facturacion_form import FacturacionForm
+
 from conexion.conexion import obtener_conexion
 
 
@@ -18,6 +37,17 @@ from conexion.conexion import obtener_conexion
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'clave-secreta-desarrollo'
+
+login_manager = LoginManager()
+
+login_manager.init_app(app)
+
+login_manager.login_view = 'login'
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return obtener_usuario_por_id(user_id)
 
 
 # ==========================================================
@@ -34,6 +64,7 @@ def inicio():
 # ==========================================================
 
 @app.route('/productos', methods=['GET'])
+@login_required
 def productos():
 
     conn = obtener_conexion()
@@ -69,6 +100,7 @@ def productos():
 # ==========================================================
 
 @app.route('/formulario_producto', methods=['GET', 'POST'])
+@login_required
 def formulario_producto():
 
     form = ProductoForm()
@@ -136,6 +168,7 @@ def formulario_producto():
 # ==========================================================
 
 @app.route('/editar_producto/<int:id>', methods=['GET', 'POST'])
+@login_required
 def editar_producto(id):
 
     conn = obtener_conexion()
@@ -234,6 +267,7 @@ def editar_producto(id):
 # ==========================================================
 
 @app.route('/eliminar_producto/<int:id>', methods=['POST'])
+@login_required
 def eliminar_producto(id):
 
     conn = obtener_conexion()
@@ -255,11 +289,8 @@ def eliminar_producto(id):
     return redirect(url_for('productos'))
 
 
-# ==========================================================
-# CLIENTES - LISTAR
-# ==========================================================
-
 @app.route('/clientes', methods=['GET'])
+@login_required
 def clientes():
 
     conn = obtener_conexion()
@@ -280,17 +311,21 @@ def clientes():
     cursor.close()
     conn.close()
 
+    # Formulario para protección CSRF
+    form = ClienteForm()
+
     return render_template(
         'clientes.html',
-        clientes=clientes
+        clientes=clientes,
+        form=form
     )
-
-
+    
 # ==========================================================
 # CLIENTES - REGISTRAR
 # ==========================================================
 
 @app.route('/formulario_cliente', methods=['GET', 'POST'])
+@login_required
 def formulario_cliente():
 
     form = ClienteForm()
@@ -329,6 +364,7 @@ def formulario_cliente():
 # ==========================================================
 
 @app.route('/editar_cliente/<int:id>', methods=['GET', 'POST'])
+@login_required
 def editar_cliente(id):
 
     conn = obtener_conexion()
@@ -397,6 +433,7 @@ def editar_cliente(id):
 # ==========================================================
 
 @app.route('/eliminar_cliente/<int:id>', methods=['POST'])
+@login_required
 def eliminar_cliente(id):
 
     conn = obtener_conexion()
@@ -423,6 +460,7 @@ def eliminar_cliente(id):
 # ==========================================================
 
 @app.route('/proveedores', methods=['GET'])
+@login_required
 def proveedores():
 
     conn = obtener_conexion()
@@ -457,6 +495,7 @@ def proveedores():
 # ==========================================================
 
 @app.route('/formulario_proveedor', methods=['GET', 'POST'])
+@login_required
 def formulario_proveedor():
 
     form = ProveedorForm()
@@ -498,6 +537,7 @@ def formulario_proveedor():
 # ==========================================================
 
 @app.route('/editar_proveedor/<int:id>', methods=['GET', 'POST'])
+@login_required
 def editar_proveedor(id):
 
     conn = obtener_conexion()
@@ -571,6 +611,7 @@ def editar_proveedor(id):
 # ==========================================================
 
 @app.route('/eliminar_proveedor/<int:id>', methods=['POST'])
+@login_required
 def eliminar_proveedor(id):
 
     conn = obtener_conexion()
@@ -594,6 +635,7 @@ def eliminar_proveedor(id):
 # ==========================================================
 
 @app.route('/facturacion', methods=['GET'])
+@login_required
 def facturacion():
 
     conn = obtener_conexion()
@@ -631,6 +673,7 @@ def facturacion():
 # ==========================================================
 
 @app.route('/formulario_facturacion', methods=['GET', 'POST'])
+@login_required
 def formulario_facturacion():
 
     form = FacturacionForm()
@@ -669,6 +712,7 @@ def formulario_facturacion():
 # ==========================================================
 
 @app.route('/editar_factura/<int:id>', methods=['GET', 'POST'])
+@login_required
 def editar_factura(id):
 
     conn = obtener_conexion()
@@ -737,6 +781,7 @@ def editar_factura(id):
 # ==========================================================
 
 @app.route('/eliminar_factura/<int:id>', methods=['POST'])
+@login_required
 def eliminar_factura(id):
 
     conn = obtener_conexion()
@@ -756,6 +801,149 @@ def eliminar_factura(id):
     conn.close()
 
     return redirect(url_for('facturacion'))
+
+
+# ==========================================================
+# USUARIOS - REGISTRO
+# ==========================================================
+
+@app.route('/registro', methods=['GET', 'POST'])
+def registro():
+
+    form = UsuarioForm()
+
+    if form.validate_on_submit():
+
+        conn = obtener_conexion()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT id
+            FROM usuarios
+            WHERE usuario = %s
+        """, (form.usuario.data,))
+
+        usuario_existente = cursor.fetchone()
+
+        if usuario_existente:
+            cursor.close()
+            conn.close()
+
+            form.usuario.errors.append(
+                'El usuario ya existe.'
+            )
+
+            return render_template(
+                'registro.html',
+                form=form
+            )
+
+        password_hash = generate_password_hash(
+            form.password.data
+        )
+
+        cursor.execute("""
+            INSERT INTO usuarios
+                (usuario, password)
+            VALUES
+                (%s, %s)
+        """, (
+            form.usuario.data,
+            password_hash
+        ))
+
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+
+        return redirect(url_for('login'))
+
+    return render_template(
+        'registro.html',
+        form=form
+    )
+
+
+# ==========================================================
+# AUTENTICACIÓN - LOGIN
+# ==========================================================
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+
+    form = LoginForm()
+
+    if form.validate_on_submit():
+
+        conn = obtener_conexion()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT
+                id,
+                usuario,
+                password
+            FROM usuarios
+            WHERE usuario = %s
+        """, (form.usuario.data,))
+
+        usuario = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        if usuario and check_password_hash(
+            usuario['password'],
+            form.password.data
+        ):
+
+            from models import Usuario
+
+            usuario_obj = Usuario(
+                usuario['id'],
+                usuario['usuario'],
+                usuario['password']
+            )
+
+            login_user(usuario_obj)
+
+            return redirect(url_for('dashboard'))
+
+        form.password.errors.append(
+            'Usuario o contraseña incorrectos.'
+        )
+
+    return render_template(
+        'login.html',
+        form=form
+    )
+
+
+# ==========================================================
+# DASHBOARD
+# ==========================================================
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+
+    return render_template(
+        'dashboard.html'
+    )
+
+
+# ==========================================================
+# LOGOUT
+# ==========================================================
+
+@app.route('/logout')
+@login_required
+def logout():
+
+    logout_user()
+
+    return redirect(url_for('login'))
 
 
 # ==========================================================

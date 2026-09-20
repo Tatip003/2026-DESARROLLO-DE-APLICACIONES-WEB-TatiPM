@@ -33,3 +33,9 @@ CREATE TABLE IF NOT EXISTS facturas (
     total DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
 );
+
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
+);

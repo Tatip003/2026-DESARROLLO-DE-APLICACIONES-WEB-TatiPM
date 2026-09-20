@@ -97,6 +97,38 @@
                     </li>
 
                 </ul>
+                
+                {% if current_user.is_authenticated %}
+
+                <span class="navbar-text me-3">
+                    Usuario: {{ current_user.usuario }}
+                </span>
+
+                <a
+                    class="btn btn-outline-danger"
+                    href="{{ url_for('logout') }}"
+                >
+                    Cerrar sesión
+                </a>
+
+            {% else %}
+
+                <a
+                    class="btn btn-outline-primary me-2"
+                    href="{{ url_for('login') }}"
+                >
+                    Iniciar sesión
+                </a>
+
+                <a
+                    class="btn btn-outline-success"
+                    href="{{ url_for('registro') }}"
+                >
+                    Registrarse
+                </a>
+
+            {% endif %}
+
 
             </div>
 
