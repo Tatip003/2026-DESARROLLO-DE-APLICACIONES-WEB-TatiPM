@@ -17,6 +17,8 @@ from werkzeug.security import (
     check_password_hash
 )
 
+from psycopg2.extras import RealDictCursor
+
 from forms.login_form import LoginForm
 from forms.usuario_form import UsuarioForm
 
@@ -68,7 +70,7 @@ def inicio():
 def productos():
 
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute("""
     SELECT
@@ -82,7 +84,7 @@ def productos():
     LEFT JOIN proveedores pr
         ON p.id_proveedor = pr.id_proveedor
     ORDER BY p.id_producto
-""")
+    """)
 
     productos = cursor.fetchall()
 
@@ -106,9 +108,8 @@ def formulario_producto():
     form = ProductoForm()
 
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-    # Obtener proveedores desde MySQL
     cursor.execute("""
         SELECT
             id_proveedor,
@@ -119,19 +120,16 @@ def formulario_producto():
 
     proveedores = cursor.fetchall()
 
-    # Mostrar en PowerShell los proveedores encontrados
     print("PROVEEDORES ENCONTRADOS:", proveedores)
 
     cursor.close()
     conn.close()
 
-    # Cargar los proveedores en el campo desplegable
     form.proveedor.choices = [
         (proveedor['id_proveedor'], proveedor['nombre'])
         for proveedor in proveedores
     ]
 
-    # Registrar producto
     if form.validate_on_submit():
 
         conn = obtener_conexion()
@@ -163,6 +161,7 @@ def formulario_producto():
         editar=False
     )
 
+
 # ==========================================================
 # PRODUCTOS - EDITAR
 # ==========================================================
@@ -172,9 +171,8 @@ def formulario_producto():
 def editar_producto(id):
 
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-    # Obtener el producto
     cursor.execute("""
         SELECT
             id_producto AS id,
@@ -189,7 +187,6 @@ def editar_producto(id):
 
     producto = cursor.fetchone()
 
-    # Obtener los proveedores
     cursor.execute("""
         SELECT
             id_proveedor,
@@ -203,19 +200,16 @@ def editar_producto(id):
     cursor.close()
     conn.close()
 
-    # Si el producto no existe
     if producto is None:
         return redirect(url_for('productos'))
 
     form = ProductoForm()
 
-    # Cargar proveedores en el campo desplegable
     form.proveedor.choices = [
         (proveedor['id_proveedor'], proveedor['nombre'])
         for proveedor in proveedores
     ]
 
-    # Mostrar los datos actuales del producto
     if request.method == 'GET':
 
         form.nombre.data = producto['nombre']
@@ -224,7 +218,6 @@ def editar_producto(id):
         form.stock.data = producto['stock']
         form.proveedor.data = producto['id_proveedor']
 
-    # Actualizar producto
     if form.validate_on_submit():
 
         conn = obtener_conexion()
@@ -289,12 +282,16 @@ def eliminar_producto(id):
     return redirect(url_for('productos'))
 
 
+# ==========================================================
+# CLIENTES - LISTAR
+# ==========================================================
+
 @app.route('/clientes', methods=['GET'])
 @login_required
 def clientes():
 
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute("""
         SELECT
@@ -311,7 +308,6 @@ def clientes():
     cursor.close()
     conn.close()
 
-    # Formulario para protección CSRF
     form = ClienteForm()
 
     return render_template(
@@ -319,7 +315,8 @@ def clientes():
         clientes=clientes,
         form=form
     )
-    
+
+
 # ==========================================================
 # CLIENTES - REGISTRAR
 # ==========================================================
@@ -368,7 +365,7 @@ def formulario_cliente():
 def editar_cliente(id):
 
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute("""
         SELECT
@@ -464,7 +461,7 @@ def eliminar_cliente(id):
 def proveedores():
 
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute("""
         SELECT
@@ -541,9 +538,8 @@ def formulario_proveedor():
 def editar_proveedor(id):
 
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-    # Buscar proveedor por ID
     cursor.execute("""
         SELECT
             id_proveedor AS id,
@@ -559,20 +555,17 @@ def editar_proveedor(id):
     cursor.close()
     conn.close()
 
-    # Si el proveedor no existe, regresar al listado
     if proveedor is None:
         return redirect(url_for('proveedores'))
 
     form = ProveedorForm()
 
-    # Cargar los datos actuales en el formulario
     if request.method == 'GET':
 
         form.nombre.data = proveedor['nombre']
         form.contacto.data = proveedor['contacto']
         form.producto.data = proveedor['producto']
 
-    # Validar y actualizar
     if form.validate_on_submit():
 
         conn = obtener_conexion()
@@ -639,7 +632,7 @@ def eliminar_proveedor(id):
 def facturacion():
 
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute("""
         SELECT
@@ -716,7 +709,7 @@ def formulario_facturacion():
 def editar_factura(id):
 
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute("""
         SELECT
@@ -877,7 +870,7 @@ def login():
     if form.validate_on_submit():
 
         conn = obtener_conexion()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         cursor.execute("""
             SELECT
@@ -952,3 +945,4 @@ def logout():
 
 if __name__ == '__main__':
     app.run(debug=True)
+

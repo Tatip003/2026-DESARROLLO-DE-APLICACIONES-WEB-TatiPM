@@ -8,7 +8,7 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
-    <title>Sistema de Ventas Digital</title>
+    <title>ElectroLife</title>
 </head>
 
 <body>
@@ -20,15 +20,12 @@
     <div class="container">
 
             <a class="navbar-brand d-flex align-items-center" href="#">
-
-                 <img src="{{ url_for('static', filename='img/im-logo.png') }}"
-                     alt="Logo"
-                    width="45"
-                    height="45"
-                     class="me-2">
-
-                 <strong>Sistema de Ventas</strong>
-
+                <img src="{{ url_for('static', filename='img/logoele.jpg') }}" 
+                 alt="ElectroLife Logo" 
+                 width="65" 
+                 height="65" 
+                 class="me-2">
+                <strong>ElectroLife</strong>
             </a>
         
         <button class="navbar-toggler"
@@ -84,17 +81,19 @@
             <div class="col-lg-6">
 
                 <h1 class="display-3 fw-bold">
-                    Bienvenido al Sistema de Ventas Digital
+                    Bienvenido a ElectroLife
                 </h1>
 
                 <p class="lead mt-4">
-                    Gestiona productos, clientes, inventarios y ventas
-                    desde una plataforma moderna, rápida y segura para
-                    optimizar los procesos comerciales.
+                    Tu centro especializado en la gestión de teléfonos, computadoras, accesorios gamer 
+                    y dispositivos electrónicos en un solo lugar. Encontrarás los mejores dispositivos 
+                    electrónicos para transformar tu vida diaria, optimizar tu productividad y llevar 
+                    tu experiencia de juego y conectividad al siguiente nivel con precios e inventario 
+                    siempre actualizados.
                 </p>
 
                 <a href="#productos" class="btn btn-primary btn-lg me-2">
-                    Ver Servicios
+                    Productos
                 </a>
 
                 <a href="#contacto" class="btn btn-outline-light btn-lg me-2">
@@ -116,36 +115,38 @@
 </section>
 
 
-        <section id="nosotros">
-            <h2>Quiénes Somos</h2>
-         <div class="row">
-
-          <div class="col-md-6">
-
-             <p>
-            ## Quiénes Somos
-
-El Sistema de Ventas Digital es una aplicación web desarrollada para facilitar la administración 
-de un negocio dedicado a la comercialización de productos tecnológicos. Su finalidad es organizar y centralizar la información relacionada con los productos, clientes, proveedores y facturación en un solo lugar.
-El sistema permite registrar y administrar productos como computadores, CPU, pendrives y diferentes accesorios tecnológicos, permitiendo controlar información como el nombre, categoría, precio, stock y proveedor.
- De esta manera, se facilita la consulta y actualización de los productos disponibles.
-Además, la aplicación permite gestionar la información de los clientes y proveedores, así como registrar y consultar datos relacionados con la facturación. También cuenta con un sistema de registro e inicio de sesión
- para controlar el acceso de los usuarios.Gracias a estas funcionalidades, el sistema contribuye a mantener organizada la información del negocio y facilita la administración de las operaciones de venta mediante el uso de herramientas tecnológicas.
-
-              </p>
-        
-
-           </div>
-
-             <div class="col-md-6">
-
-                <img src="{{ url_for('static', filename='img/System-.jpeg') }}"
-                alt="system-"
-                class="img-fluid rounded">
-
+       <section id="quienes-somos" class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            
+            <!-- Columna del texto -->
+            <div class="col-md-6 mb-4 mb-md-0">
+                <h2 class="fw-bold mb-4">Quiénes Somos</h2>
+                
+                <p class="mb-3" style="text-align: justify; line-height: 1.7;">
+                    En <strong>ElectroLife</strong> nos apasiona conectar a las personas con la tecnología que impulsa 
+                    su día a día. Somos una tienda especializada en ofrecer soluciones integrales en telefonía, computación
+                   y equipamiento gamer, respaldadas por un sistema de gestión moderno que nos permite brindar un servicio rápido,
+                    transparente y confiable.
+                </p>
+                
+                <p style="text-align: justify; line-height: 1.7;">
+                    Nuestro compromiso es seleccionar cuidadosamente cada dispositivo y accesorio para garantizar la máxima calidad 
+                    y rendimiento en tu trabajo, estudio o entretenimiento. Gracias a una organización precisa de nuestro stock y precios,
+                     te aseguramos una experiencia de compra ágil, asesoría personalizada y productos garantizados para potenciar tu vida digita.
+                </p>
             </div>
-          </div>
-    </section>
+
+            <!-- Columna de la imagen -->
+            <div class="col-md-6 text-center">
+                <img src="{{ url_for('static', filename='img/vda.jpg') }}" 
+                     alt="system-" 
+                     class="img-fluid rounded shadow-sm">
+            </div>
+
+        </div>
+    </div>
+</section>
 
 
         
@@ -232,7 +233,7 @@ Además, la aplicación permite gestionar la información de los clientes y prov
         <div class="col-md-6">
 
             <p>
-                <strong>Correo:</strong> sistemaventas@email.com<br>
+                <strong>Correo:</strong> ElectroLife@email.com<br>
                 <strong>Teléfono:</strong> +593 09 999 9999<br>
                 <strong>Dirección:</strong> Palenque, Los Ríos, Ecuador
             </p>
@@ -258,25 +259,28 @@ Además, la aplicación permite gestionar la información de los clientes y prov
 
 
 
-      <aside class="aside-info container my-4">
-
-        <h3>Información Complementaria</h3>
-
-        <p><b> Promoción especial:</b> Obtenga un mes de prueba gratuita del sistema.</p>
-
-        <p><b> Horario de atención:</b> Lunes a viernes de 08:00 a 18:00.</p>
-
-       </aside>
+      <aside class="aside-info container my-4 p-4 bg-light rounded-4 shadow-sm">
+    <h3 class="fw-bold text-primary mb-3">Información Complementaria</h3>
     
-     <article>
-      <h2>Video Informativo</h2>
-        <div class="ratio ratio-16x9 my-4">
-
-    <iframe
-        src="https://www.youtube.com/embed/fY4MJMETWQE"
-        title="Sistema de Ventas Digital"
-        allowfullscreen>
-    </iframe>
+    <p class="mb-2">
+        <strong>🔥 Promoción especial:</strong> Obtén descuentos exclusivos y accesorios de regalo en tus compras seleccionadas.
+    </p>
+    
+    <p class="mb-0 text-muted">
+        <strong>🕒 Horario de atención:</strong> Lunes a viernes de 08:00 a 18:00.
+    </p>
+</aside>
+    
+    <article class="container my-5">
+    <h2 class="fw-bold mb-3">Video Informativo</h2>
+    <div class="ratio ratio-16x9 my-4 shadow-sm rounded-3">
+        <iframe 
+            src="https://www.youtube.com/embed/h0cf2z3lrz4" 
+            title="ElectroLife - Presentación" 
+            allowfullscreen>
+        </iframe>
+    </div>
+</article>
 
 
 

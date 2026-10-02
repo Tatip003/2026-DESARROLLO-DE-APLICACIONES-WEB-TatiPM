@@ -1,5 +1,6 @@
 from flask_login import UserMixin
 from conexion.conexion import obtener_conexion
+from psycopg2.extras import RealDictCursor
 
 
 class Usuario(UserMixin):
@@ -13,7 +14,7 @@ class Usuario(UserMixin):
 def obtener_usuario_por_id(id):
 
     conn = obtener_conexion()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute("""
         SELECT
@@ -37,3 +38,4 @@ def obtener_usuario_por_id(id):
         )
 
     return None
+

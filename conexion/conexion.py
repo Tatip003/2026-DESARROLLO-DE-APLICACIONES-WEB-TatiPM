@@ -1,11 +1,12 @@
-import mysql.connector
+import psycopg2
 
 
 def obtener_conexion():
-    conexion = mysql.connector.connect(
+    conexion = psycopg2.connect(
         host='localhost',
-        user='root',
-        password='3333m',
+        port='5432',
+        user='postgres',
+        password='3333t',
         database='sis_ventas'
     )
 
