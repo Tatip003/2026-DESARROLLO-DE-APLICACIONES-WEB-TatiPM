@@ -27,6 +27,7 @@ Facturación - Sistema de Ventas
                     <th>ID</th>
                     <th>Número</th>
                     <th>Cliente</th>
+                    <th>Productos</th>
                     <th>Total</th>
                     <th>Acciones</th>
                 </tr>
@@ -39,13 +40,25 @@ Facturación - Sistema de Ventas
 
                 <tr>
 
-                    <td>{{ factura.id }}</td>
+                    <td>
+                        {{ factura.id }}
+                    </td>
 
-                    <td>{{ factura.numero }}</td>
+                    <td>
+                        {{ factura.numero }}
+                    </td>
 
-                    <td>{{ factura.cliente }}</td>
+                    <td>
+                        {{ factura.cliente }}
+                    </td>
 
-                    <td>${{ factura.total }}</td>
+                    <td>
+                        {{ factura.productos or 'Sin productos' }}
+                    </td>
+
+                    <td>
+                        ${{ factura.total }}
+                    </td>
 
                     <td>
 
@@ -83,3 +96,4 @@ Facturación - Sistema de Ventas
 </div>
 
 {% endblock %}
+

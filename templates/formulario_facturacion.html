@@ -1,103 +1,874 @@
 {% extends "base.html" %}
 
 {% block title %}
-{% if editar %}
-Editar factura
+{% if factura_guardada %}
+Factura {{ factura_guardada.numero }} - Electrolife
+{% elif editar %}
+Editar factura - Electrolife
 {% else %}
-Registrar factura
+Registrar factura - Electrolife
 {% endif %}
-- Sistema de Ventas
 {% endblock %}
 
 {% block content %}
 
-<div class="container py-5">
+<style>
 
-    <div class="card shadow">
+    /* ==========================================================
+       ESTILOS GENERALES
+       ========================================================== */
 
-        <div class="card-header bg-primary text-white">
+    .factura-container {
+        max-width: 1000px;
+        margin: 40px auto;
+    }
+
+    .factura-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .factura-header {
+        background: #0d6efd;
+        color: white;
+        padding: 20px;
+    }
+
+    .producto-item {
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #f8f9fa;
+    }
+
+    .subtotal {
+        background-color: #e9ecef;
+        font-weight: bold;
+    }
+
+    .total-box {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+    }
+
+    .factura-guardada {
+        max-width: 800px;
+        margin: 30px auto;
+        background: white;
+        padding: 40px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+    }
+
+    .factura-logo {
+        max-width: 180px;
+        height: auto;
+    }
+
+    .factura-tabla th {
+        background-color: #f1f1f1;
+    }
+
+    .factura-total {
+        font-size: 22px;
+        font-weight: bold;
+    }
+
+    /* ==========================================================
+       ESTILOS PARA IMPRESIÓN
+       ========================================================== */
+
+    @media print {
+
+        body {
+            background: white !important;
+        }
+
+        nav,
+        footer,
+        .navbar,
+        .no-print {
+            display: none !important;
+        }
+
+        .factura-guardada {
+            border: none;
+            box-shadow: none;
+            margin: 0;
+            padding: 20px;
+            max-width: 100%;
+        }
+
+        .factura-container {
+            margin: 0;
+            max-width: 100%;
+        }
+
+        .factura-logo {
+            max-width: 160px;
+        }
+
+        @page {
+            margin: 15mm;
+        }
+    }
+
+</style>
+
+
+{% if factura_guardada %}
+
+<!-- ==========================================================
+     VISTA DE FACTURA DESPUÉS DE GUARDAR
+     ========================================================== -->
+
+<div class="factura-guardada">
+
+    <div class="text-center mb-4">
+
+        <img
+            src="{{ url_for('static', filename='img/logoele.jpg') }}"
+            alt="Logo Electrolife"
+            style="max-width: 180px; height: auto;"
+            class="mb-3"
+        >
+
+        <h1 class="fw-bold">
+            ELECTROLIFE
+        </h1>
+
+        <p class="mb-1">
+            Sistema de Ventas
+        </p>
+
+        <h3>FACTURA</h3>
+
+        <hr>
+
+    </div>
+
+
+    <!-- ======================================================
+         DATOS DE LA FACTURA
+         ====================================================== -->
+
+    <div class="row mb-4">
+
+        <div class="col-md-6">
+
+            <p class="mb-1">
+                <strong>Número de factura:</strong>
+            </p>
+
+            <p>
+                {{ factura_guardada.numero }}
+            </p>
+
+        </div>
+
+
+        <div class="col-md-6 text-md-end">
+
+            <p class="mb-1">
+                <strong>ID de factura:</strong>
+            </p>
+
+            <p>
+                {{ factura_guardada.id_factura }}
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ======================================================
+         DATOS DEL CLIENTE
+         ====================================================== -->
+
+    <div class="card mb-4">
+
+        <div class="card-header bg-light">
+
+            <strong>Datos del cliente</strong>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-4">
+
+                    <strong>Cliente:</strong>
+
+                    <p>
+                        {{ factura_guardada.cliente }}
+                    </p>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <strong>Correo:</strong>
+
+                    <p>
+                        {{ factura_guardada.correo }}
+                    </p>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <strong>Teléfono:</strong>
+
+                    <p>
+                        {{ factura_guardada.telefono }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ======================================================
+         PRODUCTOS
+         ====================================================== -->
+
+    <h5 class="mb-3">
+        Productos
+    </h5>
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered factura-tabla">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Producto
+                    </th>
+
+                    <th class="text-center">
+                        Cantidad
+                    </th>
+
+                    <th class="text-end">
+                        Precio
+                    </th>
+
+                    <th class="text-end">
+                        Subtotal
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for detalle in detalles_guardados %}
+
+                <tr>
+
+                    <td>
+                        {{ detalle.producto }}
+                    </td>
+
+                    <td class="text-center">
+                        {{ detalle.cantidad }}
+                    </td>
+
+                    <td class="text-end">
+                        ${{ "%.2f"|format(detalle.precio) }}
+                    </td>
+
+                    <td class="text-end">
+                        ${{ "%.2f"|format(detalle.subtotal) }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- ======================================================
+         TOTAL
+         ====================================================== -->
+
+    <div class="row justify-content-end mt-4">
+
+        <div class="col-md-5">
+
+            <div class="total-box">
+
+                <div class="d-flex justify-content-between">
+
+                    <span>
+                        <strong>TOTAL:</strong>
+                    </span>
+
+                    <span class="factura-total">
+                        ${{ "%.2f"|format(factura_guardada.total) }}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ======================================================
+         BOTONES
+         ====================================================== -->
+
+    <div class="text-center mt-4 no-print">
+
+        <button
+            type="button"
+            class="btn btn-primary me-2"
+            onclick="window.print()"
+        >
+            Imprimir factura
+        </button>
+
+
+        <a
+            href="{{ url_for('facturacion') }}"
+            class="btn btn-secondary"
+        >
+            Volver a facturación
+        </a>
+
+    </div>
+
+</div>
+
+
+{% else %}
+
+<!-- ==========================================================
+     FORMULARIO PARA REGISTRAR / EDITAR
+     ========================================================== -->
+
+<div class="container factura-container">
+
+    <div class="card shadow factura-card">
+
+        <!-- ==================================================
+             ENCABEZADO
+             ================================================== -->
+
+        <div class="factura-header">
 
             <h3 class="mb-0">
 
                 {% if editar %}
+
                     Editar factura
+
                 {% else %}
+
                     Registrar factura
+
                 {% endif %}
 
             </h3>
 
         </div>
 
+
+        <!-- ==================================================
+             FORMULARIO
+             ================================================== -->
+
         <div class="card-body">
 
-            <form method="POST">
+            <form
+                method="POST"
+                action=""
+                id="formFactura"
+            >
 
                 {{ form.hidden_tag() }}
 
-                <!-- Número -->
+
+                <!-- ==========================================
+                     NÚMERO DE FACTURA
+                     ========================================== -->
 
                 <div class="mb-3">
 
                     {{ form.numero.label(class="form-label") }}
 
-                    {{ form.numero(class="form-control") }}
+                    {{ form.numero(
+                        class="form-control",
+                        placeholder="Ingrese el número de factura"
+                    ) }}
 
-                    {% for error in form.numero.errors %}
+                    {% if form.numero.errors %}
 
                         <div class="text-danger mt-1">
-                            {{ error }}
+
+                            {% for error in form.numero.errors %}
+
+                                <small>
+                                    {{ error }}
+                                </small><br>
+
+                            {% endfor %}
+
                         </div>
 
-                    {% endfor %}
+                    {% endif %}
 
                 </div>
 
 
-                <!-- Cliente -->
+                <!-- ==========================================
+                     CLIENTE
+                     ========================================== -->
 
                 <div class="mb-3">
 
                     {{ form.cliente.label(class="form-label") }}
 
-                    {{ form.cliente(class="form-control") }}
+                    {{ form.cliente(
+                        class="form-control",
+                        placeholder="Ingrese el nombre del cliente"
+                    ) }}
 
-                    {% for error in form.cliente.errors %}
+                    {% if form.cliente.errors %}
 
                         <div class="text-danger mt-1">
-                            {{ error }}
+
+                            {% for error in form.cliente.errors %}
+
+                                <small>
+                                    {{ error }}
+                                </small><br>
+
+                            {% endfor %}
+
                         </div>
 
-                    {% endfor %}
+                    {% endif %}
+
+                    <small class="text-muted">
+                        El cliente debe estar registrado previamente.
+                    </small>
 
                 </div>
 
 
-                <!-- Total -->
+                <!-- ==========================================
+                     PRODUCTOS
+                     ========================================== -->
 
-                <div class="mb-3">
+                <hr>
 
-                    {{ form.total.label(class="form-label") }}
+                <div class="d-flex justify-content-between align-items-center mb-3">
 
-                    {{ form.total(class="form-control") }}
-
-                    {% for error in form.total.errors %}
-
-                        <div class="text-danger mt-1">
-                            {{ error }}
-                        </div>
-
-                    {% endfor %}
+                    <h5 class="mb-0">
+                        Productos de la factura
+                    </h5>
 
                 </div>
 
 
-                {{ form.submit(class="btn btn-success") }}
+                <div id="productos-container">
 
-                <a href="{{ url_for('facturacion') }}"
-                   class="btn btn-secondary">
-                    Cancelar
-                </a>
+
+                    {% if editar and detalles %}
+
+                        <!-- ==================================
+                             PRODUCTOS EXISTENTES AL EDITAR
+                             ================================== -->
+
+                        {% for detalle in detalles %}
+
+                        <div class="producto-item">
+
+                            <div class="row g-3 align-items-end">
+
+
+                                <!-- PRODUCTO -->
+
+                                <div class="col-md-4">
+
+                                    <label class="form-label">
+                                        Producto
+                                    </label>
+
+                                    <select
+                                        name="id_producto[]"
+                                        class="form-select producto-select"
+                                        onchange="actualizarPrecio(this)"
+                                        required
+                                    >
+
+                                        <option value="">
+                                            Seleccione un producto
+                                        </option>
+
+
+                                        {% for producto in productos %}
+
+                                        <option
+                                            value="{{ producto.id_producto }}"
+                                            data-precio="{{ producto.precio }}"
+                                            {% if producto.id_producto == detalle.id_producto %}
+                                                selected
+                                            {% endif %}
+                                        >
+
+                                            {{ producto.nombre }}
+
+                                        </option>
+
+                                        {% endfor %}
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- CANTIDAD -->
+
+                                <div class="col-md-2">
+
+                                    <label class="form-label">
+                                        Cantidad
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        name="cantidad[]"
+                                        class="form-control cantidad"
+                                        min="1"
+                                        value="{{ detalle.cantidad }}"
+                                        onchange="calcularFila(this)"
+                                        oninput="calcularFila(this)"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <!-- PRECIO -->
+
+                                <div class="col-md-2">
+
+                                    <label class="form-label">
+                                        Precio
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        name="precio[]"
+                                        class="form-control precio"
+                                        step="0.01"
+                                        min="0"
+                                        value="{{ detalle.precio }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+
+                                <!-- SUBTOTAL -->
+
+                                <div class="col-md-2">
+
+                                    <label class="form-label">
+                                        Subtotal
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        class="form-control subtotal"
+                                        step="0.01"
+                                        value="{{ detalle.subtotal }}"
+                                        readonly
+                                    >
+
+                                </div>
+
+
+                                <!-- ELIMINAR -->
+
+                                <div class="col-md-2">
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-danger w-100"
+                                        onclick="eliminarProducto(this)"
+                                    >
+                                        Eliminar
+                                    </button>
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+
+                    {% else %}
+
+                        <!-- ==================================
+                             PRIMER PRODUCTO AL REGISTRAR
+                             ================================== -->
+
+                        <div class="producto-item">
+
+                            <div class="row g-3 align-items-end">
+
+
+                                <!-- PRODUCTO -->
+
+                                <div class="col-md-4">
+
+                                    <label class="form-label">
+                                        Producto
+                                    </label>
+
+                                    <select
+                                        name="id_producto[]"
+                                        class="form-select producto-select"
+                                        onchange="actualizarPrecio(this)"
+                                        required
+                                    >
+
+                                        <option value="">
+                                            Seleccione un producto
+                                        </option>
+
+
+                                        {% for producto in productos %}
+
+                                        <option
+                                            value="{{ producto.id_producto }}"
+                                            data-precio="{{ producto.precio }}"
+                                        >
+
+                                            {{ producto.nombre }}
+
+                                        </option>
+
+                                        {% endfor %}
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- CANTIDAD -->
+
+                                <div class="col-md-2">
+
+                                    <label class="form-label">
+                                        Cantidad
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        name="cantidad[]"
+                                        class="form-control cantidad"
+                                        min="1"
+                                        value="1"
+                                        onchange="calcularFila(this)"
+                                        oninput="calcularFila(this)"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <!-- PRECIO -->
+
+                                <div class="col-md-2">
+
+                                    <label class="form-label">
+                                        Precio
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        name="precio[]"
+                                        class="form-control precio"
+                                        step="0.01"
+                                        min="0"
+                                        readonly
+                                    >
+
+                                </div>
+
+
+                                <!-- SUBTOTAL -->
+
+                                <div class="col-md-2">
+
+                                    <label class="form-label">
+                                        Subtotal
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        class="form-control subtotal"
+                                        step="0.01"
+                                        value="0"
+                                        readonly
+                                    >
+
+                                </div>
+
+
+                                <!-- ELIMINAR -->
+
+                                <div class="col-md-2">
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-danger w-100"
+                                        onclick="eliminarProducto(this)"
+                                    >
+                                        Eliminar
+                                    </button>
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+                    {% endif %}
+
+
+                </div>
+
+
+                <!-- ==========================================
+                     BOTÓN AGREGAR PRODUCTO
+                     ========================================== -->
+
+                <button
+                    type="button"
+                    class="btn btn-success mb-4"
+                    onclick="agregarProducto()"
+                >
+                    + Agregar producto
+                </button>
+
+
+                <!-- ==========================================
+                     TOTAL
+                     ========================================== -->
+
+                <div class="total-box mb-4">
+
+                    <div class="row align-items-center">
+
+                        <div class="col-md-8">
+
+                            <h5 class="mb-0">
+                                Total de la factura
+                            </h5>
+
+                        </div>
+
+
+                        <div class="col-md-4">
+
+                            {{ form.total(
+                                class="form-control form-control-lg text-end",
+                                readonly=true,
+                                id="total"
+                            ) }}
+
+                            {% if form.total.errors %}
+
+                                <div class="text-danger mt-1">
+
+                                    {% for error in form.total.errors %}
+
+                                        <small>
+                                            {{ error }}
+                                        </small><br>
+
+                                    {% endfor %}
+
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ==========================================
+                     BOTONES
+                     ========================================== -->
+
+                <div class="d-flex justify-content-between">
+
+
+                    <a
+                        href="{{ url_for('facturacion') }}"
+                        class="btn btn-secondary"
+                    >
+                        Cancelar
+                    </a>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+
+                        {% if editar %}
+
+                            Actualizar factura
+
+                        {% else %}
+
+                            Guardar factura
+
+                        {% endif %}
+
+                    </button>
+
+
+                </div>
+
 
             </form>
 
@@ -106,5 +877,246 @@ Registrar factura
     </div>
 
 </div>
+
+{% endif %}
+
+
+<!-- ==========================================================
+     JAVASCRIPT
+     ========================================================== -->
+
+<script>
+
+    // ==========================================================
+    // AGREGAR PRODUCTO
+    // ==========================================================
+
+    function agregarProducto() {
+
+        const container =
+            document.getElementById("productos-container");
+
+        const productos =
+            container.querySelector(".producto-item");
+
+        if (!productos) {
+            return;
+        }
+
+        const nuevaFila =
+            productos.cloneNode(true);
+
+
+        // Limpiar producto
+
+        const select =
+            nuevaFila.querySelector(".producto-select");
+
+        select.selectedIndex = 0;
+
+
+        // Limpiar cantidad
+
+        const cantidad =
+            nuevaFila.querySelector(".cantidad");
+
+        cantidad.value = 1;
+
+
+        // Limpiar precio
+
+        const precio =
+            nuevaFila.querySelector(".precio");
+
+        precio.value = "";
+
+
+        // Limpiar subtotal
+
+        const subtotal =
+            nuevaFila.querySelector(".subtotal");
+
+        subtotal.value = "0";
+
+
+        container.appendChild(nuevaFila);
+
+        calcularTotal();
+
+    }
+
+
+    // ==========================================================
+    // ACTUALIZAR PRECIO DEL PRODUCTO
+    // ==========================================================
+
+    function actualizarPrecio(select) {
+
+        const fila =
+            select.closest(".producto-item");
+
+        if (!fila) {
+            return;
+        }
+
+
+        const opcion =
+            select.options[select.selectedIndex];
+
+
+        const precioProducto =
+            opcion.getAttribute("data-precio");
+
+
+        const precio =
+            fila.querySelector(".precio");
+
+
+        if (precioProducto) {
+
+            precio.value =
+                parseFloat(precioProducto).toFixed(2);
+
+        } else {
+
+            precio.value = "";
+
+        }
+
+
+        calcularFila(select);
+
+    }
+
+
+    // ==========================================================
+    // CALCULAR SUBTOTAL DE UNA FILA
+    // ==========================================================
+
+    function calcularFila(elemento) {
+
+        const fila =
+            elemento.closest(".producto-item");
+
+        if (!fila) {
+            return;
+        }
+
+
+        const cantidad =
+            parseFloat(
+                fila.querySelector(".cantidad").value
+            ) || 0;
+
+
+        const precio =
+            parseFloat(
+                fila.querySelector(".precio").value
+            ) || 0;
+
+
+        const subtotal =
+            fila.querySelector(".subtotal");
+
+
+        const resultado =
+            cantidad * precio;
+
+
+        subtotal.value =
+            resultado.toFixed(2);
+
+
+        calcularTotal();
+
+    }
+
+
+    // ==========================================================
+    // CALCULAR TOTAL
+    // ==========================================================
+
+    function calcularTotal() {
+
+        const subtotales =
+            document.querySelectorAll(".subtotal");
+
+
+        let total = 0;
+
+
+        subtotales.forEach(function(subtotal) {
+
+            total +=
+                parseFloat(subtotal.value) || 0;
+
+        });
+
+
+        const campoTotal =
+            document.getElementById("total");
+
+
+        if (campoTotal) {
+
+            campoTotal.value =
+                total.toFixed(2);
+
+        }
+
+    }
+
+
+    // ==========================================================
+    // ELIMINAR PRODUCTO
+    // ==========================================================
+
+    function eliminarProducto(boton) {
+
+        const container =
+            document.getElementById("productos-container");
+
+
+        const filas =
+            container.querySelectorAll(".producto-item");
+
+
+        if (filas.length <= 1) {
+
+            alert(
+                "Debe existir al menos un producto en la factura."
+            );
+
+            return;
+
+        }
+
+
+        const fila =
+            boton.closest(".producto-item");
+
+
+        fila.remove();
+
+
+        calcularTotal();
+
+    }
+
+
+    // ==========================================================
+    // CALCULAR TOTAL AL CARGAR LA PÁGINA
+    // ==========================================================
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function() {
+
+            calcularTotal();
+
+        }
+    );
+
+</script>
 
 {% endblock %}

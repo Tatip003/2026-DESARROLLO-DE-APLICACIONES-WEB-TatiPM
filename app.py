@@ -334,7 +334,11 @@ def formulario_cliente():
 
         cursor.execute("""
             INSERT INTO clientes
-            (nombre, correo, telefono)
+            (
+                nombre,
+                correo,
+                telefono
+            )
             VALUES (%s, %s, %s)
         """, (
             form.nombre.data,
@@ -400,7 +404,8 @@ def editar_cliente(id):
 
         cursor.execute("""
             UPDATE clientes
-            SET nombre = %s,
+            SET
+                nombre = %s,
                 correo = %s,
                 telefono = %s
             WHERE id_cliente = %s
@@ -436,13 +441,10 @@ def eliminar_cliente(id):
     conn = obtener_conexion()
     cursor = conn.cursor()
 
-    cursor.execute(
-        """
+    cursor.execute("""
         DELETE FROM clientes
         WHERE id_cliente = %s
-        """,
-        (id,)
-    )
+    """, (id,))
 
     conn.commit()
 
@@ -640,10 +642,25 @@ def facturacion():
             f.numero,
             f.id_cliente,
             c.nombre AS cliente,
-            f.total
+            f.total,
+            STRING_AGG(
+                p.nombre || ' (x' || d.cantidad || ')',
+                ', '
+                ORDER BY p.nombre
+            ) AS productos
         FROM facturas f
         INNER JOIN clientes c
             ON f.id_cliente = c.id_cliente
+        LEFT JOIN detalles d
+            ON f.id_factura = d.id_factura
+        LEFT JOIN productos p
+            ON d.id_producto = p.id_producto
+        GROUP BY
+            f.id_factura,
+            f.numero,
+            f.id_cliente,
+            c.nombre,
+            f.total
         ORDER BY f.id_factura
     """)
 
@@ -662,40 +679,210 @@ def facturacion():
 
 
 # ==========================================================
-# FACTURACIÓN - REGISTRAR
+# FORMULARIO FACTURACIÓN - REGISTRAR
 # ==========================================================
 
 @app.route('/formulario_facturacion', methods=['GET', 'POST'])
 @login_required
 def formulario_facturacion():
 
+    conn = obtener_conexion()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+    # ----------------------------------------------------------
+    # CARGAR PRODUCTOS PARA EL FORMULARIO
+    # ----------------------------------------------------------
+
+    cursor.execute("""
+        SELECT
+            id_producto,
+            nombre,
+            precio
+        FROM productos
+        ORDER BY nombre
+    """)
+
+    productos = cursor.fetchall()
+
+    # ----------------------------------------------------------
+    # FORMULARIO
+    # ----------------------------------------------------------
+
     form = FacturacionForm()
+
+    # ----------------------------------------------------------
+    # GUARDAR FACTURA
+    # ----------------------------------------------------------
 
     if form.validate_on_submit():
 
-        conn = obtener_conexion()
-        cursor = conn.cursor()
+        numero = form.numero.data
+        nombre_cliente = form.cliente.data
+        total = form.total.data
+
+        # ------------------------------------------------------
+        # BUSCAR CLIENTE POR NOMBRE
+        # ------------------------------------------------------
 
         cursor.execute("""
-            INSERT INTO facturas
-            (numero, id_cliente, total)
+            SELECT
+                id_cliente,
+                nombre,
+                correo,
+                telefono
+            FROM clientes
+            WHERE nombre = %s
+        """, (nombre_cliente,))
+
+        cliente = cursor.fetchone()
+
+        if not cliente:
+            form.cliente.errors.append(
+                "El cliente no existe. Regístrelo primero en Clientes."
+            )
+
+            cursor.close()
+            conn.close()
+
+            return render_template(
+                'formulario_facturacion.html',
+                form=form,
+                productos=productos,
+                editar=False
+            )
+
+        # ------------------------------------------------------
+        # INSERTAR FACTURA
+        # ------------------------------------------------------
+
+        cursor.execute("""
+            INSERT INTO facturas (
+                numero,
+                id_cliente,
+                total
+            )
             VALUES (%s, %s, %s)
+            RETURNING id_factura
         """, (
-            form.numero.data,
-            form.cliente.data,
-            form.total.data
+            numero,
+            cliente['id_cliente'],
+            total
         ))
 
+        factura_id = cursor.fetchone()['id_factura']
+
+        # ------------------------------------------------------
+        # PRODUCTOS DE LA FACTURA
+        # ------------------------------------------------------
+
+        ids_productos = request.form.getlist('id_producto[]')
+        cantidades = request.form.getlist('cantidad[]')
+        precios = request.form.getlist('precio[]')
+
+        for id_producto, cantidad, precio in zip(
+            ids_productos,
+            cantidades,
+            precios
+        ):
+
+            if not id_producto:
+                continue
+
+            cursor.execute("""
+                INSERT INTO detalles (
+                    id_factura,
+                    id_producto,
+                    cantidad,
+                    precio
+                )
+                VALUES (%s, %s, %s, %s)
+            """, (
+                factura_id,
+                int(id_producto),
+                int(cantidad),
+                float(precio)
+            ))
+
+        # ------------------------------------------------------
+        # GUARDAR CAMBIOS
+        # ------------------------------------------------------
+
         conn.commit()
+
+        # ------------------------------------------------------
+        # CONSULTAR LA FACTURA RECIÉN GUARDADA
+        # ------------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                f.id_factura,
+                f.numero,
+                f.total,
+                c.nombre AS cliente,
+                c.correo,
+                c.telefono
+            FROM facturas f
+            INNER JOIN clientes c
+                ON f.id_cliente = c.id_cliente
+            WHERE f.id_factura = %s
+        """, (factura_id,))
+
+        factura_guardada = cursor.fetchone()
+
+        # ------------------------------------------------------
+        # CONSULTAR LOS DETALLES
+        # ------------------------------------------------------
+
+        cursor.execute("""
+            SELECT
+                p.nombre AS producto,
+                d.cantidad,
+                d.precio,
+                (d.cantidad * d.precio) AS subtotal
+            FROM detalles d
+            INNER JOIN productos p
+                ON d.id_producto = p.id_producto
+            WHERE d.id_factura = %s
+            ORDER BY d.id_detalle
+        """, (factura_id,))
+
+        detalles_guardados = cursor.fetchall()
+
+        # ------------------------------------------------------
+        # CERRAR CONEXIÓN
+        # ------------------------------------------------------
 
         cursor.close()
         conn.close()
 
-        return redirect(url_for('facturacion'))
+        # ------------------------------------------------------
+        # MOSTRAR LA FACTURA EN EL MISMO HTML
+        # ------------------------------------------------------
+
+        return render_template(
+            'formulario_facturacion.html',
+            form=form,
+            productos=productos,
+            editar=False,
+            factura_guardada=factura_guardada,
+            detalles_guardados=detalles_guardados
+        )
+
+    # ----------------------------------------------------------
+    # CERRAR CONEXIÓN
+    # ----------------------------------------------------------
+
+    cursor.close()
+    conn.close()
+
+    # ----------------------------------------------------------
+    # MOSTRAR FORMULARIO
+    # ----------------------------------------------------------
 
     return render_template(
         'formulario_facturacion.html',
         form=form,
+        productos=productos,
         editar=False
     )
 
@@ -711,49 +898,183 @@ def editar_factura(id):
     conn = obtener_conexion()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
 
+    # ----------------------------------------------------------
+    # OBTENER FACTURA Y DATOS DEL CLIENTE
+    # ----------------------------------------------------------
+
     cursor.execute("""
         SELECT
-            id_factura AS id,
-            numero,
-            id_cliente,
-            total
-        FROM facturas
-        WHERE id_factura = %s
+            f.id_factura AS id,
+            f.numero,
+            f.id_cliente,
+            c.nombre AS cliente,
+            f.total
+        FROM facturas f
+        INNER JOIN clientes c
+            ON f.id_cliente = c.id_cliente
+        WHERE f.id_factura = %s
     """, (id,))
 
     factura = cursor.fetchone()
 
+    if factura is None:
+        cursor.close()
+        conn.close()
+        return redirect(url_for('facturacion'))
+
+    # ----------------------------------------------------------
+    # OBTENER TODOS LOS PRODUCTOS
+    # ----------------------------------------------------------
+
+    cursor.execute("""
+        SELECT
+            id_producto,
+            nombre,
+            precio
+        FROM productos
+        ORDER BY nombre
+    """)
+
+    productos = cursor.fetchall()
+
+    # ----------------------------------------------------------
+    # OBTENER PRODUCTOS DE LA FACTURA
+    # ----------------------------------------------------------
+
+    cursor.execute("""
+        SELECT
+            d.id_producto,
+            p.nombre,
+            d.cantidad,
+            d.precio,
+            (d.cantidad * d.precio) AS subtotal
+        FROM detalles d
+        INNER JOIN productos p
+            ON d.id_producto = p.id_producto
+        WHERE d.id_factura = %s
+        ORDER BY d.id_detalle
+    """, (id,))
+
+    detalles = cursor.fetchall()
+
     cursor.close()
     conn.close()
 
-    if factura is None:
-        return redirect(url_for('facturacion'))
+    # ----------------------------------------------------------
+    # FORMULARIO
+    # ----------------------------------------------------------
 
     form = FacturacionForm()
+
+    # ----------------------------------------------------------
+    # CARGAR DATOS AL EDITAR
+    # ----------------------------------------------------------
 
     if request.method == 'GET':
 
         form.numero.data = factura['numero']
-        form.cliente.data = factura['id_cliente']
+
+        # Ahora mostramos el NOMBRE del cliente
+        form.cliente.data = factura['cliente']
+
         form.total.data = factura['total']
+
+    # ----------------------------------------------------------
+    # ACTUALIZAR FACTURA
+    # ----------------------------------------------------------
 
     if form.validate_on_submit():
 
         conn = obtener_conexion()
-        cursor = conn.cursor()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # ------------------------------------------------------
+        # BUSCAR CLIENTE POR NOMBRE
+        # ------------------------------------------------------
+
+        cursor.execute("""
+            SELECT id_cliente
+            FROM clientes
+            WHERE nombre = %s
+        """, (form.cliente.data,))
+
+        cliente = cursor.fetchone()
+
+        if not cliente:
+
+            form.cliente.errors.append(
+                "El cliente no existe. Regístrelo primero en Clientes."
+            )
+
+            cursor.close()
+            conn.close()
+
+            return render_template(
+                'formulario_facturacion.html',
+                form=form,
+                productos=productos,
+                detalles=detalles,
+                editar=True
+            )
+
+        # ------------------------------------------------------
+        # ACTUALIZAR FACTURA
+        # ------------------------------------------------------
 
         cursor.execute("""
             UPDATE facturas
-            SET numero = %s,
+            SET
+                numero = %s,
                 id_cliente = %s,
                 total = %s
             WHERE id_factura = %s
         """, (
             form.numero.data,
-            form.cliente.data,
+            cliente['id_cliente'],
             form.total.data,
             id
         ))
+
+        # ------------------------------------------------------
+        # ELIMINAR DETALLES ANTERIORES
+        # ------------------------------------------------------
+
+        cursor.execute("""
+            DELETE FROM detalles
+            WHERE id_factura = %s
+        """, (id,))
+
+        # ------------------------------------------------------
+        # GUARDAR LOS NUEVOS PRODUCTOS
+        # ------------------------------------------------------
+
+        ids_productos = request.form.getlist('id_producto[]')
+        cantidades = request.form.getlist('cantidad[]')
+        precios = request.form.getlist('precio[]')
+
+        for id_producto, cantidad, precio in zip(
+            ids_productos,
+            cantidades,
+            precios
+        ):
+
+            if not id_producto:
+                continue
+
+            cursor.execute("""
+                INSERT INTO detalles (
+                    id_factura,
+                    id_producto,
+                    cantidad,
+                    precio
+                )
+                VALUES (%s, %s, %s, %s)
+            """, (
+                id,
+                int(id_producto),
+                int(cantidad),
+                float(precio)
+            ))
 
         conn.commit()
 
@@ -762,11 +1083,18 @@ def editar_factura(id):
 
         return redirect(url_for('facturacion'))
 
+    # ----------------------------------------------------------
+    # MOSTRAR FORMULARIO DE EDICIÓN
+    # ----------------------------------------------------------
+
     return render_template(
         'formulario_facturacion.html',
         form=form,
+        productos=productos,
+        detalles=detalles,
         editar=True
     )
+
 
 
 # ==========================================================
@@ -780,15 +1108,28 @@ def eliminar_factura(id):
     conn = obtener_conexion()
     cursor = conn.cursor()
 
-    cursor.execute(
-        """
-        DELETE FROM facturas
-        WHERE id_factura = %s
-        """,
-        (id,)
-    )
+    try:
 
-    conn.commit()
+        cursor.execute("""
+            DELETE FROM detalles
+            WHERE id_factura = %s
+        """, (id,))
+
+        cursor.execute("""
+            DELETE FROM facturas
+            WHERE id_factura = %s
+        """, (id,))
+
+        conn.commit()
+
+    except Exception:
+
+        conn.rollback()
+
+        cursor.close()
+        conn.close()
+
+        raise
 
     cursor.close()
     conn.close()
