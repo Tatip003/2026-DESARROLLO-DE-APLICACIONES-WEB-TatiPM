@@ -1,10 +1,11 @@
-
-/*  ESTILOS GENERALES  */
+/* ==========================================================
+   ESTILOS GENERALES
+========================================================== */
 
 body {
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
-    padding: 0;
+    padding: 75px 0 0 0;
     background-color: lightgray;
     font-size: 16px;
 }
@@ -21,7 +22,9 @@ h1 {
 }
 
 
-/*  NAVBAR  */
+/* ==========================================================
+   NAVBAR
+========================================================== */
 
 .navbar {
     padding: 12px 0;
@@ -47,7 +50,9 @@ h1 {
 }
 
 
-/*  HEADER  */
+/* ==========================================================
+   HEADER
+========================================================== */
 
 header {
     background: #f8f8f8;
@@ -56,23 +61,58 @@ header {
 }
 
 
-/* = HERO = */
+/* ==========================================================
+   HERO - PÁGINA PRINCIPAL
+========================================================== */
 
 .hero {
-    background-image: linear-gradient(rgba(0,0,0,.55),
-                      rgba(0,0,0,.55)),
-                      url("../img/ventas.jpg");
+    position: relative;
 
     background-size: cover;
-    background-position: center;
+    background-position: center center;
     background-repeat: no-repeat;
 
-    min-height: 90vh;
+    min-height: 100vh;
 
     display: flex;
     align-items: center;
 
     color: white;
+
+    padding-top: 100px;
+    padding-bottom: 60px;
+    padding-left: 40px;
+    padding-right: 40px;
+}
+
+/* Contenedor del texto */
+.hero .container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Texto principal */
+.hero h1 {
+    font-size: 3.2rem;
+    margin-bottom: 20px;
+    text-align: left;
+    border: none;
+    padding: 0;
+}
+
+/* Párrafos */
+.hero p {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    max-width: 700px;
+    margin-bottom: 20px;
+}
+
+/* Botones */
+.hero .btn {
+    padding: 12px 28px;
+    border-radius: 30px;
+    margin-top: 10px;
 }
 
 .hero h1 {
@@ -92,7 +132,9 @@ header {
 }
 
 
-/* ===== COMPONENTES ===== */
+/* ==========================================================
+   COMPONENTES
+========================================================== */
 
 .card {
     transition: 0.3s;
@@ -114,7 +156,9 @@ header {
 }
 
 
-/* ===== FOOTER ===== */
+/* ==========================================================
+   FOOTER
+========================================================== */
 
 .footer-custom {
     background-color: #d3eef5;
@@ -122,25 +166,47 @@ header {
 }
 
 
-/* ===== RESPONSIVE ===== */
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
 
 @media (max-width:600px){
-    body{
-        background-color:rgb(231,237,240);
-        font-size:14px;
+
+    body {
+        background-color: rgb(231,237,240);
+        font-size: 14px;
+    }
+
+    .hero {
+        min-height: 90vh;
+        padding-top: 80px;
+    }
+
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+
+    .hero p {
+        font-size: 1rem;
     }
 }
+
 
 @media (min-width:601px) and (max-width:1024px){
-    body{
-        background-color:rgb(233,245,233);
-        font-size:16px;
+
+    body {
+        background-color: rgb(233,245,233);
+        font-size: 16px;
     }
+
 }
 
+
 @media (min-width:1025px){
-    body{
-        background-color:rgb(252,252,247);
-        font-size:18px;
+
+    body {
+        background-color: rgb(252,252,247);
+        font-size: 18px;
     }
+
 }

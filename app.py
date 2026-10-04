@@ -888,7 +888,7 @@ def formulario_facturacion():
 
 
 # ==========================================================
-# FACTURACIÓN - EDITAR
+# FACTURACIÓN - EDITAR / VER
 # ==========================================================
 
 @app.route('/editar_factura/<int:id>', methods=['GET', 'POST'])
@@ -898,9 +898,16 @@ def editar_factura(id):
     conn = obtener_conexion()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-    # ----------------------------------------------------------
+    # ==========================================================
+    # DETERMINAR SI ES SOLO VISUALIZACIÓN
+    # ==========================================================
+
+    ver = request.args.get('ver') == '1'
+
+
+    # ==========================================================
     # OBTENER FACTURA Y DATOS DEL CLIENTE
-    # ----------------------------------------------------------
+    # ==========================================================
 
     cursor.execute("""
         SELECT
@@ -908,6 +915,8 @@ def editar_factura(id):
             f.numero,
             f.id_cliente,
             c.nombre AS cliente,
+            c.correo,
+            c.telefono,
             f.total
         FROM facturas f
         INNER JOIN clientes c
@@ -917,14 +926,22 @@ def editar_factura(id):
 
     factura = cursor.fetchone()
 
+
+    # ==========================================================
+    # VERIFICAR SI EXISTE LA FACTURA
+    # ==========================================================
+
     if factura is None:
+
         cursor.close()
         conn.close()
+
         return redirect(url_for('facturacion'))
 
-    # ----------------------------------------------------------
+
+    # ==========================================================
     # OBTENER TODOS LOS PRODUCTOS
-    # ----------------------------------------------------------
+    # ==========================================================
 
     cursor.execute("""
         SELECT
@@ -937,9 +954,10 @@ def editar_factura(id):
 
     productos = cursor.fetchall()
 
-    # ----------------------------------------------------------
-    # OBTENER PRODUCTOS DE LA FACTURA
-    # ----------------------------------------------------------
+
+    # ==========================================================
+    # OBTENER LOS PRODUCTOS DE LA FACTURA
+    # ==========================================================
 
     cursor.execute("""
         SELECT
@@ -957,48 +975,63 @@ def editar_factura(id):
 
     detalles = cursor.fetchall()
 
+
     cursor.close()
     conn.close()
 
-    # ----------------------------------------------------------
-    # FORMULARIO
-    # ----------------------------------------------------------
+
+    # ==========================================================
+    # CREAR FORMULARIO
+    # ==========================================================
 
     form = FacturacionForm()
 
-    # ----------------------------------------------------------
-    # CARGAR DATOS AL EDITAR
-    # ----------------------------------------------------------
+
+    # ==========================================================
+    # CARGAR DATOS EN EL FORMULARIO
+    # SOLO PARA EDICIÓN
+    # ==========================================================
 
     if request.method == 'GET':
 
         form.numero.data = factura['numero']
 
-        # Ahora mostramos el NOMBRE del cliente
         form.cliente.data = factura['cliente']
 
         form.total.data = factura['total']
 
-    # ----------------------------------------------------------
-    # ACTUALIZAR FACTURA
-    # ----------------------------------------------------------
 
-    if form.validate_on_submit():
+    # ==========================================================
+    # ACTUALIZAR FACTURA
+    #
+    # IMPORTANTE:
+    # Si estamos en modo "Ver / Imprimir", esta parte
+    # NO se ejecuta.
+    # ==========================================================
+
+    if not ver and form.validate_on_submit():
 
         conn = obtener_conexion()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-        # ------------------------------------------------------
+
+        # ======================================================
         # BUSCAR CLIENTE POR NOMBRE
-        # ------------------------------------------------------
+        # ======================================================
 
         cursor.execute("""
-            SELECT id_cliente
+            SELECT
+                id_cliente
             FROM clientes
             WHERE nombre = %s
         """, (form.cliente.data,))
 
         cliente = cursor.fetchone()
+
+
+        # ======================================================
+        # VERIFICAR CLIENTE
+        # ======================================================
 
         if not cliente:
 
@@ -1014,12 +1047,17 @@ def editar_factura(id):
                 form=form,
                 productos=productos,
                 detalles=detalles,
-                editar=True
+                editar=True,
+                ver=False,
+                factura=factura,
+                factura_guardada=None,
+                detalles_guardados=None
             )
 
-        # ------------------------------------------------------
-        # ACTUALIZAR FACTURA
-        # ------------------------------------------------------
+
+        # ======================================================
+        # ACTUALIZAR CABECERA DE LA FACTURA
+        # ======================================================
 
         cursor.execute("""
             UPDATE facturas
@@ -1035,22 +1073,31 @@ def editar_factura(id):
             id
         ))
 
-        # ------------------------------------------------------
+
+        # ======================================================
         # ELIMINAR DETALLES ANTERIORES
-        # ------------------------------------------------------
+        # ======================================================
 
         cursor.execute("""
             DELETE FROM detalles
             WHERE id_factura = %s
         """, (id,))
 
-        # ------------------------------------------------------
-        # GUARDAR LOS NUEVOS PRODUCTOS
-        # ------------------------------------------------------
+
+        # ======================================================
+        # OBTENER NUEVOS PRODUCTOS
+        # ======================================================
 
         ids_productos = request.form.getlist('id_producto[]')
+
         cantidades = request.form.getlist('cantidad[]')
+
         precios = request.form.getlist('precio[]')
+
+
+        # ======================================================
+        # INSERTAR NUEVOS DETALLES
+        # ======================================================
 
         for id_producto, cantidad, precio in zip(
             ids_productos,
@@ -1076,26 +1123,102 @@ def editar_factura(id):
                 float(precio)
             ))
 
+
+        # ======================================================
+        # GUARDAR CAMBIOS
+        # ======================================================
+
         conn.commit()
+
 
         cursor.close()
         conn.close()
 
+
+        # ======================================================
+        # DESPUÉS DE ACTUALIZAR
+        # VOLVER A LA LISTA DE FACTURAS
+        # ======================================================
+
         return redirect(url_for('facturacion'))
 
-    # ----------------------------------------------------------
-    # MOSTRAR FORMULARIO DE EDICIÓN
-    # ----------------------------------------------------------
+
+    # ==========================================================
+    # PREPARAR FACTURA PARA LA VISTA
+    # "VER / IMPRIMIR"
+    # ==========================================================
+
+    if ver:
+
+        factura_guardada = {
+
+            'id_factura': factura['id'],
+
+            'numero': factura['numero'],
+
+            'cliente': factura['cliente'],
+
+            'correo': factura['correo'],
+
+            'telefono': factura['telefono'],
+
+            'total': factura['total']
+
+        }
+
+
+        # ======================================================
+        # PREPARAR DETALLES PARA LA VISTA DE FACTURA
+        # ======================================================
+
+        detalles_guardados = []
+
+
+        for detalle in detalles:
+
+            detalles_guardados.append({
+
+                'producto': detalle['nombre'],
+
+                'cantidad': detalle['cantidad'],
+
+                'precio': detalle['precio'],
+
+                'subtotal': detalle['subtotal']
+
+            })
+
+
+    else:
+
+        factura_guardada = None
+
+        detalles_guardados = None
+
+
+    # ==========================================================
+    # MOSTRAR FORMULARIO O FACTURA
+    # ==========================================================
 
     return render_template(
         'formulario_facturacion.html',
+
         form=form,
+
         productos=productos,
+
         detalles=detalles,
-        editar=True
+
+        editar=not ver,
+
+        ver=ver,
+
+        factura=factura,
+
+        factura_guardada=factura_guardada,
+
+        detalles_guardados=detalles_guardados
     )
-
-
 
 # ==========================================================
 # FACTURACIÓN - ELIMINAR

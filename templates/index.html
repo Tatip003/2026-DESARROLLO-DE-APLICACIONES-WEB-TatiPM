@@ -1,110 +1,72 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% extends "base.html" %}
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+{% block title %}
+Inicio - ElectroLife
+{% endblock %}
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% block content %}
 
-    <title>ElectroLife</title>
-</head>
 
-<body>
-    <!-- ========= base.html ========= -->
- 
-<!-- Navegación reutilizable -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 
-    <div class="container">
+<section id="inicio"
+         class="hero"
+         style="background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url('{{ url_for('static', filename='img/elec.jpg') }}');">
 
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="{{ url_for('static', filename='img/logoele.jpg') }}" 
-                 alt="ElectroLife Logo" 
-                 width="65" 
-                 height="65" 
-                 class="me-2">
-                <strong>ElectroLife</strong>
-            </a>
-        
-        <button class="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#menu">
+        <div class="row align-items-center" style="min-height: 90vh;">
 
-            <span class="navbar-toggler-icon"></span>
+            <div class="col-lg-7">
 
-        </button>
-
-        <div class="collapse navbar-collapse" id="menu">
-
-            <ul class="navbar-nav ms-auto">
-
-                <li class="nav-item">
-                    <a class="nav-link" href="#inicio">Inicio</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="#nosotros">Quiénes Somos</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="#productos">Productos</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="#contacto">Contacto</a>
-                </li>
-                <li class="nav-item ms-2">
-                    <a class="btn btn-primary" href="{{ url_for('login') }}">Iniciar sesión </a>
-                </li>
-
-            </ul>
-
-        </div>
-
-    </div>
-
-</nav>
-<!-- Fin de la navegación -->
-
-<!-- Contenido dinámico -->
-       <main>
-
-<section id="inicio" class="hero">
-
-    <div class="container">
-
-        <div class="row align-items-center" style="min-height:90vh;">
-
-            <div class="col-lg-6">
+                <span class="badge bg-primary mb-3 px-3 py-2">
+                    Tecnología y gestión en un solo lugar
+                </span>
 
                 <h1 class="display-3 fw-bold">
                     Bienvenido a ElectroLife
                 </h1>
 
                 <p class="lead mt-4">
-                    Tu centro especializado en la gestión de teléfonos, computadoras, accesorios gamer 
-                    y dispositivos electrónicos en un solo lugar. Encontrarás los mejores dispositivos 
-                    electrónicos para transformar tu vida diaria, optimizar tu productividad y llevar 
-                    tu experiencia de juego y conectividad al siguiente nivel con precios e inventario 
-                    siempre actualizados.
+                    Tu centro especializado en la gestión de teléfonos,
+                    computadoras, accesorios gamer y dispositivos
+                    electrónicos en un solo lugar.
                 </p>
 
-                <a href="#productos" class="btn btn-primary btn-lg me-2">
-                    Productos
-                </a>
+                <p class="mt-3">
+                    Encuentra productos de calidad, administra tu
+                    inventario y lleva el control de clientes,
+                    proveedores y facturación de manera organizada.
+                </p>
 
-                <a href="#contacto" class="btn btn-outline-light btn-lg me-2">
-                    Contacto
-                </a>
+                <!-- BOTONES FUNCIONALES -->
 
-                <button class="btn btn-info btn-lg"
+                <div class="mt-4">
+
+                    <a
+                        href="#productos"
+                        class="btn btn-primary btn-lg me-2 mb-2"
+                    >
+                        <i class="bi bi-box-seam"></i>
+                        Ver productos
+                    </a>
+
+                    <a
+                        href="#contacto"
+                        class="btn btn-outline-light btn-lg me-2 mb-2"
+                    >
+                        <i class="bi bi-envelope"></i>
+                        Contactarnos
+                    </a>
+
+                    <button
+                        type="button"
+                        class="btn btn-info btn-lg mb-2"
                         data-bs-toggle="modal"
-                        data-bs-target="#miModal">
-                    Más información
-                </button>
+                        data-bs-target="#miModal"
+                    >
+                        <i class="bi bi-info-circle"></i>
+                        Más información
+                    </button>
+
+                </div>
 
             </div>
 
@@ -115,136 +77,583 @@
 </section>
 
 
-       <section id="quienes-somos" class="py-5 bg-light">
-    <div class="container">
-        <div class="row align-items-center">
-            
-            <!-- Columna del texto -->
-            <div class="col-md-6 mb-4 mb-md-0">
-                <h2 class="fw-bold mb-4">Quiénes Somos</h2>
-                
-                <p class="mb-3" style="text-align: justify; line-height: 1.7;">
-                    En <strong>ElectroLife</strong> nos apasiona conectar a las personas con la tecnología que impulsa 
-                    su día a día. Somos una tienda especializada en ofrecer soluciones integrales en telefonía, computación
-                   y equipamiento gamer, respaldadas por un sistema de gestión moderno que nos permite brindar un servicio rápido,
-                    transparente y confiable.
+<!-- ==========================================================
+     QUIÉNES SOMOS
+========================================================== -->
+
+<section
+    id="quienes-somos"
+    class="py-5 bg-light"
+>
+
+    <div class="container py-4">
+
+        <div class="row align-items-center g-5">
+
+            <!-- TEXTO -->
+
+            <div class="col-md-6">
+
+                <span class="text-primary fw-bold">
+                    CONÓCENOS
+                </span>
+
+                <h2 class="fw-bold display-6 mt-2 mb-4">
+                    Quiénes Somos
+                </h2>
+
+                <p
+                    class="mb-3"
+                    style="text-align: justify; line-height: 1.8;"
+                >
+                    En <strong>ElectroLife</strong> nos apasiona conectar
+                    a las personas con la tecnología que impulsa su día
+                    a día. Somos una tienda especializada en ofrecer
+                    soluciones integrales en telefonía, computación y
+                    equipamiento gamer.
                 </p>
-                
-                <p style="text-align: justify; line-height: 1.7;">
-                    Nuestro compromiso es seleccionar cuidadosamente cada dispositivo y accesorio para garantizar la máxima calidad 
-                    y rendimiento en tu trabajo, estudio o entretenimiento. Gracias a una organización precisa de nuestro stock y precios,
-                     te aseguramos una experiencia de compra ágil, asesoría personalizada y productos garantizados para potenciar tu vida digita.
+
+                <p
+                    style="text-align: justify; line-height: 1.8;"
+                >
+                    Nuestro sistema de gestión nos permite organizar
+                    productos, clientes, proveedores e inventario,
+                    facilitando un servicio rápido, transparente y
+                    confiable.
                 </p>
+
+                <p
+                    style="text-align: justify; line-height: 1.8;"
+                >
+                    Nuestro compromiso es seleccionar cuidadosamente
+                    cada dispositivo y accesorio para garantizar calidad
+                    y rendimiento en el trabajo, estudio o entretenimiento.
+                </p>
+
+                <!-- BOTÓN -->
+
+                <a
+                    href="{{ url_for('productos') }}"
+                    class="btn btn-primary mt-3"
+                >
+                    <i class="bi bi-arrow-right-circle"></i>
+                    Explorar productos
+                </a>
+
             </div>
 
-            <!-- Columna de la imagen -->
+
+            <!-- IMAGEN -->
+
             <div class="col-md-6 text-center">
-                <img src="{{ url_for('static', filename='img/vda.jpg') }}" 
-                     alt="system-" 
-                     class="img-fluid rounded shadow-sm">
+
+                <img
+                    src="{{ url_for('static', filename='img/vda.jpg') }}"
+                    alt="Tecnología ElectroLife"
+                    class="img-fluid rounded-4 shadow"
+                >
+
             </div>
 
         </div>
+
     </div>
+
 </section>
 
 
-        
-      <section id="productos" class="container p-3">
+<!-- ==========================================================
+     PRODUCTOS Y SERVICIOS
+========================================================== -->
 
-    <h2 class="text-center m-3">Productos y Servicios</h2>
+<section
+    id="productos"
+    class="container py-5"
+>
 
-    <!-- Las tarjetas se crearán dinámicamente desde JavaScript -->
-    <div class="row" id="listaServicios">
+    <div class="text-center mb-5">
+
+        <span class="text-primary fw-bold">
+            NUESTROS SERVICIOS
+        </span>
+
+        <h2 class="fw-bold display-6 mt-2">
+            Productos y Servicios
+        </h2>
+
+        <p class="text-muted">
+            Administra de manera sencilla las diferentes áreas
+            de ElectroLife.
+        </p>
 
     </div>
 
-    </section>
-       
 
-       <section id="contacto" class="container p-3">
+    <!-- ======================================================
+         TARJETAS GENERADAS POR JAVASCRIPT
+    ======================================================= -->
 
-    <h2 class="text-center m-3">Contacto</h2>
+    <div
+        class="row g-4"
+        id="listaServicios"
+    >
+    </div>
 
-    <div class="row">
 
-        <!-- Formulario -->
-        <div class="col-md-6">
+    <!-- ======================================================
+         ACCESOS DIRECTOS
+    ======================================================= -->
 
-            <form id="formContacto">
+    <div class="row g-4 mt-4">
 
-                <div class="row">
+        <!-- PRODUCTOS -->
 
-                    <div class="col-md-6 mb-3">
-                        <label for="nombre" class="form-label">Nombre</label>
-                        <input type="text" id="nombre" class="form-control">
-                        <small id="errorNombre" class="text-danger"></small>
+        <div class="col-md-6 col-lg-3">
+
+            <div class="card h-100 shadow-sm border-0 text-center">
+
+                <div class="card-body p-4">
+
+                    <div class="fs-1 text-primary mb-3">
+                        <i class="bi bi-box-seam"></i>
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label for="categoria" class="form-label">Categoría</label>
-                        <input type="text" id="categoria" class="form-control">
-                        <small id="errorCategoria" class="text-danger"></small>
-                    </div>
+                    <h5 class="fw-bold">
+                        Productos
+                    </h5>
+
+                    <p class="text-muted">
+                        Administra productos, precios,
+                        categorías y stock.
+                    </p>
+
+                    <a
+                        href="{{ url_for('productos') }}"
+                        class="btn btn-primary"
+                    >
+                        Administrar
+                    </a>
 
                 </div>
 
-                <div class="mb-3">
-                    <label for="descripcion" class="form-label">Descripción</label>
-                    <input type="text" id="descripcion" class="form-control">
-                    <small id="errorDescripcion" class="text-danger"></small>
-                </div>
-
-                <div class="mb-3">
-                    <label for="tipo" class="form-label">Tipo</label>
-                    <input type="text" id="tipo" class="form-control">
-                    <small id="errorTipo" class="text-danger"></small>
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    Registrar
-                </button>
-                  
-                <div id="spinnerCarga" class="text-center mt-3" style="display:none;">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Cargando...</span>
-                </div>
-                     <p class="mt-2">Guardando información...</p>
-                </div>
-            </form>
-
-            <p id="mensaje" class="mt-3"></p>
-
-            <p>Total de registros: <span id="total">0</span></p>
-
-            <div id="listaRegistros"></div>
-
-            <div class="alert alert-success mt-3" style="display:none;" id="alertaExito">
-                Datos guardados correctamente.
-            </div>
-
-            <div class="alert alert-danger mt-3" style="display:none;" id="alertaError">
-                Corrija los errores antes de registrar.
             </div>
 
         </div>
 
-        <!-- Información de contacto -->
-        <div class="col-md-6">
 
-            <p>
-                <strong>Correo:</strong> ElectroLife@email.com<br>
-                <strong>Teléfono:</strong> +593 09 999 9999<br>
-                <strong>Dirección:</strong> Palenque, Los Ríos, Ecuador
+        <!-- CLIENTES -->
+
+        <div class="col-md-6 col-lg-3">
+
+            <div class="card h-100 shadow-sm border-0 text-center">
+
+                <div class="card-body p-4">
+
+                    <div class="fs-1 text-success mb-3">
+                        <i class="bi bi-people"></i>
+                    </div>
+
+                    <h5 class="fw-bold">
+                        Clientes
+                    </h5>
+
+                    <p class="text-muted">
+                        Registra y administra la información
+                        de tus clientes.
+                    </p>
+
+                    <a
+                        href="{{ url_for('clientes') }}"
+                        class="btn btn-success"
+                    >
+                        Administrar
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- PROVEEDORES -->
+
+        <div class="col-md-6 col-lg-3">
+
+            <div class="card h-100 shadow-sm border-0 text-center">
+
+                <div class="card-body p-4">
+
+                    <div class="fs-1 text-warning mb-3">
+                        <i class="bi bi-truck"></i>
+                    </div>
+
+                    <h5 class="fw-bold">
+                        Proveedores
+                    </h5>
+
+                    <p class="text-muted">
+                        Gestiona proveedores y la información
+                        de sus productos.
+                    </p>
+
+                    <a
+                        href="{{ url_for('proveedores') }}"
+                        class="btn btn-warning"
+                    >
+                        Administrar
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- FACTURACIÓN -->
+
+        <div class="col-md-6 col-lg-3">
+
+            <div class="card h-100 shadow-sm border-0 text-center">
+
+                <div class="card-body p-4">
+
+                    <div class="fs-1 text-danger mb-3">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+
+                    <h5 class="fw-bold">
+                        Facturación
+                    </h5>
+
+                    <p class="text-muted">
+                        Registra facturas y administra
+                        tus ventas.
+                    </p>
+
+                    <a
+                        href="{{ url_for('facturacion') }}"
+                        class="btn btn-danger"
+                    >
+                        Administrar
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ==========================================================
+     CONTACTO
+========================================================== -->
+
+<section
+    id="contacto"
+    class="py-5 bg-light"
+>
+
+    <div class="container py-4">
+
+        <div class="text-center mb-5">
+
+            <span class="text-primary fw-bold">
+                ESTAMOS PARA AYUDARTE
+            </span>
+
+            <h2 class="fw-bold display-6 mt-2">
+                Contacto
+            </h2>
+
+            <p class="text-muted">
+                Déjanos tus datos y registra tu solicitud.
             </p>
 
-            <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18..."
-                width="100%"
-                height="200"
-                style="border:0;"
-                loading="lazy">
-            </iframe>
+        </div>
+
+
+        <div class="row g-5">
+
+            <!-- ==================================================
+                 FORMULARIO
+            =================================================== -->
+
+            <div class="col-md-6">
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body p-4">
+
+                        <h4 class="fw-bold mb-4">
+                            <i class="bi bi-chat-dots text-primary"></i>
+                            Formulario de contacto
+                        </h4>
+
+
+                        <form id="formContacto">
+
+                            <div class="row">
+
+                                <!-- NOMBRE -->
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label
+                                        for="nombre"
+                                        class="form-label fw-semibold"
+                                    >
+                                        Nombre
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="nombre"
+                                        class="form-control"
+                                        placeholder="Ingrese su nombre"
+                                    >
+
+                                    <small
+                                        id="errorNombre"
+                                        class="text-danger"
+                                    ></small>
+
+                                </div>
+
+
+                                <!-- CATEGORÍA -->
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label
+                                        for="categoria"
+                                        class="form-label fw-semibold"
+                                    >
+                                        Categoría
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="categoria"
+                                        class="form-control"
+                                        placeholder="Ej. Computación"
+                                    >
+
+                                    <small
+                                        id="errorCategoria"
+                                        class="text-danger"
+                                    ></small>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- DESCRIPCIÓN -->
+
+                            <div class="mb-3">
+
+                                <label
+                                    for="descripcion"
+                                    class="form-label fw-semibold"
+                                >
+                                    Descripción
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="descripcion"
+                                    class="form-control"
+                                    placeholder="Escriba su solicitud"
+                                >
+
+                                <small
+                                    id="errorDescripcion"
+                                    class="text-danger"
+                                ></small>
+
+                            </div>
+
+
+                            <!-- TIPO -->
+
+                            <div class="mb-3">
+
+                                <label
+                                    for="tipo"
+                                    class="form-label fw-semibold"
+                                >
+                                    Tipo
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="tipo"
+                                    class="form-control"
+                                    placeholder="Ej. Consulta"
+                                >
+
+                                <small
+                                    id="errorTipo"
+                                    class="text-danger"
+                                ></small>
+
+                            </div>
+
+
+                            <!-- BOTÓN -->
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary w-100"
+                            >
+                                <i class="bi bi-send"></i>
+                                Registrar
+                            </button>
+
+
+                            <!-- SPINNER -->
+
+                            <div
+                                id="spinnerCarga"
+                                class="text-center mt-3"
+                                style="display:none;"
+                            >
+
+                                <div
+                                    class="spinner-border text-primary"
+                                    role="status"
+                                >
+                                    <span class="visually-hidden">
+                                        Cargando...
+                                    </span>
+                                </div>
+
+                                <p class="mt-2">
+                                    Guardando información...
+                                </p>
+
+                            </div>
+
+                        </form>
+
+
+                        <!-- MENSAJE -->
+
+                        <p
+                            id="mensaje"
+                            class="mt-3"
+                        ></p>
+
+
+                        <!-- TOTAL -->
+
+                        <p class="mt-3">
+                            <strong>
+                                Total de registros:
+                            </strong>
+
+                            <span id="total">
+                                0
+                            </span>
+                        </p>
+
+
+                        <!-- LISTA -->
+
+                        <div id="listaRegistros"></div>
+
+
+                        <!-- ÉXITO -->
+
+                        <div
+                            class="alert alert-success mt-3"
+                            style="display:none;"
+                            id="alertaExito"
+                        >
+                            Datos guardados correctamente.
+                        </div>
+
+
+                        <!-- ERROR -->
+
+                        <div
+                            class="alert alert-danger mt-3"
+                            style="display:none;"
+                            id="alertaError"
+                        >
+                            Corrija los errores antes de registrar.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 INFORMACIÓN DE CONTACTO
+            =================================================== -->
+
+            <div class="col-md-6">
+
+                <div class="card border-0 shadow-sm h-100">
+
+                    <div class="card-body p-4">
+
+                        <h4 class="fw-bold mb-4">
+                            <i class="bi bi-geo-alt text-primary"></i>
+                            Encuéntranos
+                        </h4>
+
+
+                        <div class="mb-4">
+
+                            <p class="mb-2">
+                                <i class="bi bi-envelope text-primary"></i>
+                                <strong>Correo:</strong>
+                                ElectroLife@email.com
+                            </p>
+
+                            <p class="mb-2">
+                                <i class="bi bi-telephone text-primary"></i>
+                                <strong>Teléfono:</strong>
+                                +593 09 999 9999
+                            </p>
+
+                            <p class="mb-4">
+                                <i class="bi bi-geo-alt text-primary"></i>
+                                <strong>Dirección:</strong>
+                                Palenque, Los Ríos, Ecuador
+                            </p>
+
+                        </div>
+
+
+                        <!-- MAPA -->
+
+                        <div class="ratio ratio-16x9 rounded overflow-hidden">
+
+                            <iframe
+                                src="https://maps.google.com/maps?q=Parque+Central+De+Palenque,+Ecuador&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                                title="Ubicación de ElectroLife"
+                                style="border:0;"
+                                loading="lazy"
+                                 allowfullscreen>
+                            </iframe>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
 
         </div>
 
@@ -252,96 +661,199 @@
 
 </section>
 
+
+<!-- ==========================================================
+     INFORMACIÓN COMPLEMENTARIA
+========================================================== -->
+
+<aside
+    class="container my-5 p-4 bg-light rounded-4 shadow-sm"
+>
+
+    <div class="row align-items-center">
+
+        <div class="col-md-8">
+
+            <span class="text-primary fw-bold">
+                INFORMACIÓN
+            </span>
+
+            <h3 class="fw-bold mt-2">
+                Información Complementaria
+            </h3>
+
+            <p class="mb-2">
+
+                <strong>
+                    <i class="bi bi-tag-fill text-danger"></i>
+                    Promoción especial:
+                </strong>
+
+                Obtén descuentos exclusivos y accesorios
+                de regalo en tus compras seleccionadas.
+
+            </p>
+
+            <p class="mb-0 text-muted">
+
+                <strong>
+                    <i class="bi bi-clock-fill"></i>
+                    Horario de atención:
+                </strong>
+
+                Lunes a viernes de 08:00 a 18:00.
+
+            </p>
+
+        </div>
+
+
+        <div class="col-md-4 text-center mt-3 mt-md-0">
+
+            <i class="bi bi-headset display-1 text-primary"></i>
+
         </div>
 
     </div>
 
-
-
-
-      <aside class="aside-info container my-4 p-4 bg-light rounded-4 shadow-sm">
-    <h3 class="fw-bold text-primary mb-3">Información Complementaria</h3>
-    
-    <p class="mb-2">
-        <strong>🔥 Promoción especial:</strong> Obtén descuentos exclusivos y accesorios de regalo en tus compras seleccionadas.
-    </p>
-    
-    <p class="mb-0 text-muted">
-        <strong>🕒 Horario de atención:</strong> Lunes a viernes de 08:00 a 18:00.
-    </p>
 </aside>
-    
-    <article class="container my-5">
-    <h2 class="fw-bold mb-3">Video Informativo</h2>
-    <div class="ratio ratio-16x9 my-4 shadow-sm rounded-3">
-        <iframe 
-            src="https://www.youtube.com/embed/h0cf2z3lrz4" 
-            title="ElectroLife - Presentación" 
-            allowfullscreen>
-        </iframe>
+
+
+<!-- ==========================================================
+     VIDEO INFORMATIVO
+========================================================== -->
+
+<section class="container my-5">
+
+    <div class="text-center mb-4">
+
+        <span class="text-primary fw-bold">
+            CONOCE ELECTROLIFE
+        </span>
+
+        <h2 class="fw-bold mt-2">
+            Video Informativo
+        </h2>
+
     </div>
-</article>
 
 
+    <div class="ratio ratio-16x9 shadow rounded-4 overflow-hidden">
 
-        </div>
- 
-  <!-- ========= Fin de base.html ========= -->
+        <iframe
+            src="https://www.youtube.com/embed/h0cf2z3lrz4"
+            title="ElectroLife - Presentación"
+            allowfullscreen
+        >
+        </iframe>
 
-<!-- Pie de página reutilizable -->
-    </article>
-  
-<!-- Modal Bootstrap -->
-<div class="modal fade" id="miModal" tabindex="-1" aria-labelledby="tituloModal" aria-hidden="true">
-    <div class="modal-dialog">
+    </div>
+
+</section>
+
+
+<!-- ==========================================================
+     MODAL
+========================================================== -->
+
+<div
+    class="modal fade"
+    id="miModal"
+    tabindex="-1"
+    aria-labelledby="tituloModal"
+    aria-hidden="true"
+>
+
+    <div class="modal-dialog modal-dialog-centered">
+
         <div class="modal-content">
 
+
+            <!-- ENCABEZADO -->
+
             <div class="modal-header">
-                <h5 class="modal-title" id="tituloModal">
-                    Información del Sistema
+
+                <h5
+                    class="modal-title"
+                    id="tituloModal"
+                >
+                    <i class="bi bi-info-circle text-primary"></i>
+                    Información de ElectroLife
                 </h5>
 
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar"
+                >
                 </button>
+
             </div>
+
+
+            <!-- CONTENIDO -->
 
             <div class="modal-body">
+
                 <p>
-                    Gracias por utilizar el Sistema de Ventas Digital.
-                    Aquí podrá registrar productos, administrar clientes
-                    y controlar el inventario.
+                    Gracias por utilizar <strong>ElectroLife</strong>.
                 </p>
+
+                <p>
+                    En nuestra plataforma puedes gestionar productos,
+                    clientes, proveedores e información relacionada
+                    con la facturación.
+                </p>
+
+                <p class="mb-0">
+                    Utiliza el menú superior para acceder a cada módulo
+                    del sistema.
+                </p>
+
             </div>
 
+
+            <!-- PIE -->
+
             <div class="modal-footer">
-                <button type="button"
-                        class="btn btn-secondary"
-                        data-bs-dismiss="modal">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
                     Cerrar
                 </button>
+
+                {% if current_user.is_authenticated %}
+
+                <a
+                    href="{{ url_for('dashboard') }}"
+                    class="btn btn-primary"
+                >
+                    <i class="bi bi-speedometer2"></i>
+                    Ir al panel
+                </a>
+
+                {% else %}
+
+                <a
+                    href="{{ url_for('login') }}"
+                    class="btn btn-primary"
+                >
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    Iniciar sesión
+                </a>
+
+                {% endif %}
+
             </div>
 
         </div>
+
     </div>
+
 </div>
-   <footer class="footer-custom text-center p-4 mt-5">
 
-    <p class="mb-1">
-        <b>Nombre del estudiante:</b> Tatiana Stefania Peñafiel Moran
-    </p>
-
-    <p class="mb-1">
-        <b>Asignatura:</b> Desarrollo de Aplicaciones Web
-    </p>
-
-    <p class="mb-0">
-        <b>Año:</b> 2026
-    </p>
-</main>
-    </footer>
-        <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
-</html>
+{% endblock %}

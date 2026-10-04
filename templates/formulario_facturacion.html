@@ -77,6 +77,7 @@ Registrar factura - Electrolife
         font-weight: bold;
     }
 
+
     /* ==========================================================
        ESTILOS PARA IMPRESIÓN
        ========================================================== */
@@ -122,18 +123,21 @@ Registrar factura - Electrolife
 {% if factura_guardada %}
 
 <!-- ==========================================================
-     VISTA DE FACTURA DESPUÉS DE GUARDAR
+     VISTA DE FACTURA GUARDADA
      ========================================================== -->
 
 <div class="factura-guardada">
+
+    <!-- ======================================================
+         ENCABEZADO DE LA FACTURA
+         ====================================================== -->
 
     <div class="text-center mb-4">
 
         <img
             src="{{ url_for('static', filename='img/logoele.jpg') }}"
             alt="Logo Electrolife"
-            style="max-width: 180px; height: auto;"
-            class="mb-3"
+            class="factura-logo mb-3"
         >
 
         <h1 class="fw-bold">
@@ -144,7 +148,9 @@ Registrar factura - Electrolife
             Sistema de Ventas
         </p>
 
-        <h3>FACTURA</h3>
+        <h3>
+            FACTURA
+        </h3>
 
         <hr>
 
@@ -193,7 +199,9 @@ Registrar factura - Electrolife
 
         <div class="card-header bg-light">
 
-            <strong>Datos del cliente</strong>
+            <strong>
+                Datos del cliente
+            </strong>
 
         </div>
 
@@ -203,7 +211,9 @@ Registrar factura - Electrolife
 
                 <div class="col-md-4">
 
-                    <strong>Cliente:</strong>
+                    <strong>
+                        Cliente:
+                    </strong>
 
                     <p>
                         {{ factura_guardada.cliente }}
@@ -214,7 +224,9 @@ Registrar factura - Electrolife
 
                 <div class="col-md-4">
 
-                    <strong>Correo:</strong>
+                    <strong>
+                        Correo:
+                    </strong>
 
                     <p>
                         {{ factura_guardada.correo }}
@@ -225,7 +237,9 @@ Registrar factura - Electrolife
 
                 <div class="col-md-4">
 
-                    <strong>Teléfono:</strong>
+                    <strong>
+                        Teléfono:
+                    </strong>
 
                     <p>
                         {{ factura_guardada.telefono }}
@@ -247,6 +261,7 @@ Registrar factura - Electrolife
     <h5 class="mb-3">
         Productos
     </h5>
+
 
     <div class="table-responsive">
 
@@ -279,29 +294,43 @@ Registrar factura - Electrolife
 
             <tbody>
 
-                {% for detalle in detalles_guardados %}
+                {% if detalles_guardados %}
 
-                <tr>
+                    {% for detalle in detalles_guardados %}
 
-                    <td>
-                        {{ detalle.producto }}
-                    </td>
+                    <tr>
 
-                    <td class="text-center">
-                        {{ detalle.cantidad }}
-                    </td>
+                        <td>
+                            {{ detalle.producto }}
+                        </td>
 
-                    <td class="text-end">
-                        ${{ "%.2f"|format(detalle.precio) }}
-                    </td>
+                        <td class="text-center">
+                            {{ detalle.cantidad }}
+                        </td>
 
-                    <td class="text-end">
-                        ${{ "%.2f"|format(detalle.subtotal) }}
-                    </td>
+                        <td class="text-end">
+                            ${{ "%.2f"|format(detalle.precio) }}
+                        </td>
 
-                </tr>
+                        <td class="text-end">
+                            ${{ "%.2f"|format(detalle.subtotal) }}
+                        </td>
 
-                {% endfor %}
+                    </tr>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <tr>
+
+                        <td colspan="4" class="text-center text-muted">
+                            No hay productos registrados.
+                        </td>
+
+                    </tr>
+
+                {% endif %}
 
             </tbody>
 
@@ -320,10 +349,12 @@ Registrar factura - Electrolife
 
             <div class="total-box">
 
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between align-items-center">
 
                     <span>
-                        <strong>TOTAL:</strong>
+                        <strong>
+                            TOTAL:
+                        </strong>
                     </span>
 
                     <span class="factura-total">
@@ -340,7 +371,7 @@ Registrar factura - Electrolife
 
 
     <!-- ======================================================
-         BOTONES
+         BOTONES DE FACTURA
          ====================================================== -->
 
     <div class="text-center mt-4 no-print">
@@ -368,6 +399,7 @@ Registrar factura - Electrolife
 
 {% else %}
 
+
 <!-- ==========================================================
      FORMULARIO PARA REGISTRAR / EDITAR
      ========================================================== -->
@@ -375,6 +407,7 @@ Registrar factura - Electrolife
 <div class="container factura-container">
 
     <div class="card shadow factura-card">
+
 
         <!-- ==================================================
              ENCABEZADO
@@ -400,7 +433,7 @@ Registrar factura - Electrolife
 
 
         <!-- ==================================================
-             FORMULARIO
+             CUERPO
              ================================================== -->
 
         <div class="card-body">
@@ -427,6 +460,7 @@ Registrar factura - Electrolife
                         placeholder="Ingrese el número de factura"
                     ) }}
 
+
                     {% if form.numero.errors %}
 
                         <div class="text-danger mt-1">
@@ -435,7 +469,9 @@ Registrar factura - Electrolife
 
                                 <small>
                                     {{ error }}
-                                </small><br>
+                                </small>
+
+                                <br>
 
                             {% endfor %}
 
@@ -459,6 +495,7 @@ Registrar factura - Electrolife
                         placeholder="Ingrese el nombre del cliente"
                     ) }}
 
+
                     {% if form.cliente.errors %}
 
                         <div class="text-danger mt-1">
@@ -467,7 +504,9 @@ Registrar factura - Electrolife
 
                                 <small>
                                     {{ error }}
-                                </small><br>
+                                </small>
+
+                                <br>
 
                             {% endfor %}
 
@@ -475,8 +514,11 @@ Registrar factura - Electrolife
 
                     {% endif %}
 
+
                     <small class="text-muted">
+
                         El cliente debe estar registrado previamente.
+
                     </small>
 
                 </div>
@@ -487,6 +529,7 @@ Registrar factura - Electrolife
                      ========================================== -->
 
                 <hr>
+
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
 
@@ -502,8 +545,9 @@ Registrar factura - Electrolife
 
                     {% if editar and detalles %}
 
+
                         <!-- ==================================
-                             PRODUCTOS EXISTENTES AL EDITAR
+                             PRODUCTOS EXISTENTES
                              ================================== -->
 
                         {% for detalle in detalles %}
@@ -520,6 +564,7 @@ Registrar factura - Electrolife
                                     <label class="form-label">
                                         Producto
                                     </label>
+
 
                                     <select
                                         name="id_producto[]"
@@ -562,6 +607,7 @@ Registrar factura - Electrolife
                                         Cantidad
                                     </label>
 
+
                                     <input
                                         type="number"
                                         name="cantidad[]"
@@ -584,6 +630,7 @@ Registrar factura - Electrolife
                                         Precio
                                     </label>
 
+
                                     <input
                                         type="number"
                                         name="precio[]"
@@ -604,6 +651,7 @@ Registrar factura - Electrolife
                                     <label class="form-label">
                                         Subtotal
                                     </label>
+
 
                                     <input
                                         type="number"
@@ -630,7 +678,6 @@ Registrar factura - Electrolife
 
                                 </div>
 
-
                             </div>
 
                         </div>
@@ -640,8 +687,9 @@ Registrar factura - Electrolife
 
                     {% else %}
 
+
                         <!-- ==================================
-                             PRIMER PRODUCTO AL REGISTRAR
+                             PRIMER PRODUCTO
                              ================================== -->
 
                         <div class="producto-item">
@@ -656,6 +704,7 @@ Registrar factura - Electrolife
                                     <label class="form-label">
                                         Producto
                                     </label>
+
 
                                     <select
                                         name="id_producto[]"
@@ -695,6 +744,7 @@ Registrar factura - Electrolife
                                         Cantidad
                                     </label>
 
+
                                     <input
                                         type="number"
                                         name="cantidad[]"
@@ -717,6 +767,7 @@ Registrar factura - Electrolife
                                         Precio
                                     </label>
 
+
                                     <input
                                         type="number"
                                         name="precio[]"
@@ -736,6 +787,7 @@ Registrar factura - Electrolife
                                     <label class="form-label">
                                         Subtotal
                                     </label>
+
 
                                     <input
                                         type="number"
@@ -762,19 +814,17 @@ Registrar factura - Electrolife
 
                                 </div>
 
-
                             </div>
 
                         </div>
 
                     {% endif %}
 
-
                 </div>
 
 
                 <!-- ==========================================
-                     BOTÓN AGREGAR PRODUCTO
+                     AGREGAR PRODUCTO
                      ========================================== -->
 
                 <button
@@ -811,6 +861,7 @@ Registrar factura - Electrolife
                                 id="total"
                             ) }}
 
+
                             {% if form.total.errors %}
 
                                 <div class="text-danger mt-1">
@@ -819,7 +870,9 @@ Registrar factura - Electrolife
 
                                         <small>
                                             {{ error }}
-                                        </small><br>
+                                        </small>
+
+                                        <br>
 
                                     {% endfor %}
 
@@ -866,7 +919,6 @@ Registrar factura - Electrolife
 
                     </button>
 
-
                 </div>
 
 
@@ -887,6 +939,7 @@ Registrar factura - Electrolife
 
 <script>
 
+
     // ==========================================================
     // AGREGAR PRODUCTO
     // ==========================================================
@@ -896,50 +949,70 @@ Registrar factura - Electrolife
         const container =
             document.getElementById("productos-container");
 
-        const productos =
+
+        const productoOriginal =
             container.querySelector(".producto-item");
 
-        if (!productos) {
+
+        if (!productoOriginal) {
             return;
         }
 
+
         const nuevaFila =
-            productos.cloneNode(true);
+            productoOriginal.cloneNode(true);
 
 
-        // Limpiar producto
+        // ------------------------------------------------------
+        // LIMPIAR PRODUCTO
+        // ------------------------------------------------------
 
         const select =
             nuevaFila.querySelector(".producto-select");
 
+
         select.selectedIndex = 0;
 
 
-        // Limpiar cantidad
+        // ------------------------------------------------------
+        // LIMPIAR CANTIDAD
+        // ------------------------------------------------------
 
         const cantidad =
             nuevaFila.querySelector(".cantidad");
 
+
         cantidad.value = 1;
 
 
-        // Limpiar precio
+        // ------------------------------------------------------
+        // LIMPIAR PRECIO
+        // ------------------------------------------------------
 
         const precio =
             nuevaFila.querySelector(".precio");
 
+
         precio.value = "";
 
 
-        // Limpiar subtotal
+        // ------------------------------------------------------
+        // LIMPIAR SUBTOTAL
+        // ------------------------------------------------------
 
         const subtotal =
             nuevaFila.querySelector(".subtotal");
 
+
         subtotal.value = "0";
 
 
+        // ------------------------------------------------------
+        // AGREGAR NUEVA FILA
+        // ------------------------------------------------------
+
         container.appendChild(nuevaFila);
+
 
         calcularTotal();
 
@@ -954,6 +1027,7 @@ Registrar factura - Electrolife
 
         const fila =
             select.closest(".producto-item");
+
 
         if (!fila) {
             return;
@@ -990,13 +1064,14 @@ Registrar factura - Electrolife
 
 
     // ==========================================================
-    // CALCULAR SUBTOTAL DE UNA FILA
+    // CALCULAR SUBTOTAL
     // ==========================================================
 
     function calcularFila(elemento) {
 
         const fila =
             elemento.closest(".producto-item");
+
 
         if (!fila) {
             return;
@@ -1105,7 +1180,7 @@ Registrar factura - Electrolife
 
 
     // ==========================================================
-    // CALCULAR TOTAL AL CARGAR LA PÁGINA
+    // CALCULAR TOTAL AL CARGAR
     // ==========================================================
 
     document.addEventListener(
