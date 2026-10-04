@@ -128,9 +128,7 @@ Registrar factura - Electrolife
 
 <div class="factura-guardada">
 
-    <!-- ======================================================
-         ENCABEZADO DE LA FACTURA
-         ====================================================== -->
+    <!-- ENCABEZADO -->
 
     <div class="text-center mb-4">
 
@@ -157,9 +155,7 @@ Registrar factura - Electrolife
     </div>
 
 
-    <!-- ======================================================
-         DATOS DE LA FACTURA
-         ====================================================== -->
+    <!-- DATOS DE LA FACTURA -->
 
     <div class="row mb-4">
 
@@ -191,9 +187,7 @@ Registrar factura - Electrolife
     </div>
 
 
-    <!-- ======================================================
-         DATOS DEL CLIENTE
-         ====================================================== -->
+    <!-- DATOS DEL CLIENTE -->
 
     <div class="card mb-4">
 
@@ -254,9 +248,7 @@ Registrar factura - Electrolife
     </div>
 
 
-    <!-- ======================================================
-         PRODUCTOS
-         ====================================================== -->
+    <!-- PRODUCTOS -->
 
     <h5 class="mb-3">
         Productos
@@ -339,9 +331,7 @@ Registrar factura - Electrolife
     </div>
 
 
-    <!-- ======================================================
-         TOTAL
-         ====================================================== -->
+    <!-- TOTAL -->
 
     <div class="row justify-content-end mt-4">
 
@@ -370,9 +360,44 @@ Registrar factura - Electrolife
     </div>
 
 
-    <!-- ======================================================
-         BOTONES DE FACTURA
-         ====================================================== -->
+    <!-- ESTADO DE LA FACTURA -->
+
+    <div class="row justify-content-end mt-3">
+
+        <div class="col-md-5">
+
+            <div class="total-box">
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <span>
+                        <strong>
+                            ESTADO:
+                        </strong>
+                    </span>
+
+                    <span>
+                        {% if factura_guardada.estado == 'Pagada' %}
+                            <span class="badge bg-success">
+                                Pagada
+                            </span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">
+                                Pendiente
+                            </span>
+                        {% endif %}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- BOTONES DE FACTURA -->
 
     <div class="text-center mt-4 no-print">
 
@@ -409,9 +434,7 @@ Registrar factura - Electrolife
     <div class="card shadow factura-card">
 
 
-        <!-- ==================================================
-             ENCABEZADO
-             ================================================== -->
+        <!-- ENCABEZADO -->
 
         <div class="factura-header">
 
@@ -432,9 +455,7 @@ Registrar factura - Electrolife
         </div>
 
 
-        <!-- ==================================================
-             CUERPO
-             ================================================== -->
+        <!-- CUERPO -->
 
         <div class="card-body">
 
@@ -546,9 +567,7 @@ Registrar factura - Electrolife
                     {% if editar and detalles %}
 
 
-                        <!-- ==================================
-                             PRODUCTOS EXISTENTES
-                             ================================== -->
+                        <!-- PRODUCTOS EXISTENTES -->
 
                         {% for detalle in detalles %}
 
@@ -688,9 +707,7 @@ Registrar factura - Electrolife
                     {% else %}
 
 
-                        <!-- ==================================
-                             PRIMER PRODUCTO
-                             ================================== -->
+                        <!-- PRIMER PRODUCTO -->
 
                         <div class="producto-item">
 
@@ -883,6 +900,39 @@ Registrar factura - Electrolife
                         </div>
 
                     </div>
+
+                </div>
+
+
+                <!-- ==========================================
+                     ESTADO DE LA FACTURA
+                     ========================================== -->
+
+                <div class="mb-4">
+
+                    {{ form.estado.label(class="form-label") }}
+
+                    {{ form.estado(
+                        class="form-select"
+                    ) }}
+
+                    {% if form.estado.errors %}
+
+                        <div class="text-danger mt-1">
+
+                            {% for error in form.estado.errors %}
+
+                                <small>
+                                    {{ error }}
+                                </small>
+
+                                <br>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% endif %}
 
                 </div>
 

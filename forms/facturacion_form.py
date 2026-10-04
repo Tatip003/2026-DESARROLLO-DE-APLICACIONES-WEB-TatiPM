@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, FloatField, SubmitField
+from wtforms import StringField, FloatField, SelectField, SubmitField
 from wtforms.validators import DataRequired, Length, NumberRange
 
 
@@ -26,6 +26,17 @@ class FacturacionForm(FlaskForm):
         validators=[
             DataRequired(),
             NumberRange(min=0)
+        ]
+    )
+
+    estado = SelectField(
+        'Estado de la factura',
+        choices=[
+            ('Pendiente', 'Pendiente'),
+            ('Pagada', 'Pagada')
+        ],
+        validators=[
+            DataRequired()
         ]
     )
 

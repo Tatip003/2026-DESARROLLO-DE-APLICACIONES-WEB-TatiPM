@@ -697,7 +697,8 @@ def formulario_facturacion():
         SELECT
             id_producto,
             nombre,
-            precio
+            precio,
+            stock
         FROM productos
         ORDER BY nombre
     """)
@@ -719,9 +720,163 @@ def formulario_facturacion():
         numero = form.numero.data
         nombre_cliente = form.cliente.data
         total = form.total.data
+        estado = form.estado.data
 
         # ------------------------------------------------------
-        # BUSCAR CLIENTE POR NOMBRE
+        # OBTENER PRODUCTOS SELECCIONADOS
+        # ------------------------------------------------------
+
+        ids_productos = request.form.getlist('id_producto[]')
+        cantidades = request.form.getlist('cantidad[]')
+        precios = request.form.getlist('precio[]')
+
+        productos_seleccionados = []
+
+        # ------------------------------------------------------
+        # VALIDAR DATOS DE LOS PRODUCTOS
+        # ------------------------------------------------------
+
+        for id_producto, cantidad, precio in zip(
+            ids_productos,
+            cantidades,
+            precios
+        ):
+
+            if not id_producto:
+                continue
+
+            try:
+                id_producto = int(id_producto)
+                cantidad = int(cantidad)
+                precio = float(precio)
+
+            except (ValueError, TypeError):
+
+                form.total.errors.append(
+                    "Los datos de los productos no son válidos."
+                )
+
+                cursor.close()
+                conn.close()
+
+                return render_template(
+                    'formulario_facturacion.html',
+                    form=form,
+                    productos=productos,
+                    editar=False
+                )
+
+            if cantidad <= 0:
+
+                form.total.errors.append(
+                    "La cantidad debe ser mayor que cero."
+                )
+
+                cursor.close()
+                conn.close()
+
+                return render_template(
+                    'formulario_facturacion.html',
+                    form=form,
+                    productos=productos,
+                    editar=False
+                )
+
+            productos_seleccionados.append({
+                'id_producto': id_producto,
+                'cantidad': cantidad,
+                'precio': precio
+            })
+
+        # ------------------------------------------------------
+        # VALIDAR QUE EXISTA AL MENOS UN PRODUCTO
+        # ------------------------------------------------------
+
+        if not productos_seleccionados:
+
+            form.total.errors.append(
+                "Debe seleccionar al menos un producto."
+            )
+
+            cursor.close()
+            conn.close()
+
+            return render_template(
+                'formulario_facturacion.html',
+                form=form,
+                productos=productos,
+                editar=False
+            )
+
+        # ------------------------------------------------------
+        # VALIDAR STOCK DISPONIBLE
+        # ------------------------------------------------------
+
+        cantidades_por_producto = {}
+
+        for producto in productos_seleccionados:
+
+            id_producto = producto['id_producto']
+            cantidad = producto['cantidad']
+
+            if id_producto not in cantidades_por_producto:
+                cantidades_por_producto[id_producto] = 0
+
+            cantidades_por_producto[id_producto] += cantidad
+
+        for id_producto, cantidad_solicitada in cantidades_por_producto.items():
+
+            cursor.execute("""
+                SELECT
+                    id_producto,
+                    nombre,
+                    stock
+                FROM productos
+                WHERE id_producto = %s
+                FOR UPDATE
+            """, (id_producto,))
+
+            producto_db = cursor.fetchone()
+
+            if not producto_db:
+
+                form.total.errors.append(
+                    "Uno de los productos seleccionados ya no existe."
+                )
+
+                cursor.close()
+                conn.close()
+
+                return render_template(
+                    'formulario_facturacion.html',
+                    form=form,
+                    productos=productos,
+                    editar=False
+                )
+
+            stock_disponible = producto_db['stock']
+
+            if cantidad_solicitada > stock_disponible:
+
+                form.total.errors.append(
+                    f"No hay suficiente stock de "
+                    f"'{producto_db['nombre']}'. "
+                    f"Disponible: {stock_disponible}. "
+                    f"Solicitado: {cantidad_solicitada}."
+                )
+
+                cursor.close()
+                conn.close()
+
+                return render_template(
+                    'formulario_facturacion.html',
+                    form=form,
+                    productos=productos,
+                    editar=False
+                )
+
+        # ------------------------------------------------------
+        # BUSCAR CLIENTE
         # ------------------------------------------------------
 
         cursor.execute("""
@@ -737,6 +892,7 @@ def formulario_facturacion():
         cliente = cursor.fetchone()
 
         if not cliente:
+
             form.cliente.errors.append(
                 "El cliente no existe. Regístrelo primero en Clientes."
             )
@@ -759,34 +915,33 @@ def formulario_facturacion():
             INSERT INTO facturas (
                 numero,
                 id_cliente,
-                total
+                total,
+                estado
             )
-            VALUES (%s, %s, %s)
+            VALUES (%s, %s, %s, %s)
             RETURNING id_factura
         """, (
             numero,
             cliente['id_cliente'],
-            total
+            total,
+            estado
         ))
 
         factura_id = cursor.fetchone()['id_factura']
 
         # ------------------------------------------------------
-        # PRODUCTOS DE LA FACTURA
+        # INSERTAR DETALLES Y RESTAR STOCK
         # ------------------------------------------------------
 
-        ids_productos = request.form.getlist('id_producto[]')
-        cantidades = request.form.getlist('cantidad[]')
-        precios = request.form.getlist('precio[]')
+        for producto in productos_seleccionados:
 
-        for id_producto, cantidad, precio in zip(
-            ids_productos,
-            cantidades,
-            precios
-        ):
+            id_producto = producto['id_producto']
+            cantidad = producto['cantidad']
+            precio = producto['precio']
 
-            if not id_producto:
-                continue
+            # ----------------------------------------------
+            # INSERTAR DETALLE
+            # ----------------------------------------------
 
             cursor.execute("""
                 INSERT INTO detalles (
@@ -798,19 +953,32 @@ def formulario_facturacion():
                 VALUES (%s, %s, %s, %s)
             """, (
                 factura_id,
-                int(id_producto),
-                int(cantidad),
-                float(precio)
+                id_producto,
+                cantidad,
+                precio
+            ))
+
+            # ----------------------------------------------
+            # RESTAR STOCK
+            # ----------------------------------------------
+
+            cursor.execute("""
+                UPDATE productos
+                SET stock = stock - %s
+                WHERE id_producto = %s
+            """, (
+                cantidad,
+                id_producto
             ))
 
         # ------------------------------------------------------
-        # GUARDAR CAMBIOS
+        # GUARDAR TODO
         # ------------------------------------------------------
 
         conn.commit()
 
         # ------------------------------------------------------
-        # CONSULTAR LA FACTURA RECIÉN GUARDADA
+        # CONSULTAR FACTURA GUARDADA
         # ------------------------------------------------------
 
         cursor.execute("""
@@ -818,6 +986,7 @@ def formulario_facturacion():
                 f.id_factura,
                 f.numero,
                 f.total,
+                f.estado,
                 c.nombre AS cliente,
                 c.correo,
                 c.telefono
@@ -830,7 +999,7 @@ def formulario_facturacion():
         factura_guardada = cursor.fetchone()
 
         # ------------------------------------------------------
-        # CONSULTAR LOS DETALLES
+        # CONSULTAR DETALLES
         # ------------------------------------------------------
 
         cursor.execute("""
@@ -856,7 +1025,7 @@ def formulario_facturacion():
         conn.close()
 
         # ------------------------------------------------------
-        # MOSTRAR LA FACTURA EN EL MISMO HTML
+        # MOSTRAR FACTURA
         # ------------------------------------------------------
 
         return render_template(
@@ -1003,10 +1172,6 @@ def editar_factura(id):
 
     # ==========================================================
     # ACTUALIZAR FACTURA
-    #
-    # IMPORTANTE:
-    # Si estamos en modo "Ver / Imprimir", esta parte
-    # NO se ejecuta.
     # ==========================================================
 
     if not ver and form.validate_on_submit():
